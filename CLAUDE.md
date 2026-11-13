@@ -26,6 +26,10 @@ Editor HTML estático do Boletim Informativo mensal da Controladoria CDs MI. Sub
 - Também testar em `file://`, que é o uso real. O painel do navegador do app mostra `file://` só como snapshot estático. Use o Playwright do `giro-estoque/node_modules` com `channel: 'msedge'`.
 - Excel real para gerar HTML de colagem: COM `Excel.Application` + `Range.Copy()` + `Clipboard.GetText(Html)`. O Excel já põe a formatação condicional inline no HTML.
 
+## Repositório
+
+Privado: `github.com/bwernerdev/boletim-cds`. O `gh` não está no PATH. Use o portátil do RPA: `RPA\ferramentas\gh\bin\gh.exe` com `$env:GH_CONFIG_DIR = "<projetos>\RPA\ferramentas\gh-config"`. O `git push` funciona direto, pelo Gerenciador de Credenciais.
+
 ## Origem
 
 Modelo: `Boletim Informativo - CDs MI - 10-2025.docx` (15 seções, 9 personagens, cerca de 20 tabelas). Imagens extraídas do `.docx` e convertidas para `.webp`.
