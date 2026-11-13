@@ -9,13 +9,15 @@ Editor HTML estático do Boletim Informativo mensal da Controladoria CDs MI. Sub
 - `app/conteudo.js`: `PERSONAGENS` e `SECOES` (falas, textos, quadros de tabela). Textos com marcadores `{mes}`, `{ano}` etc.; `[trecho]` = pendente de revisão (amarelo).
 - `app/app.js`: monta a página, marcadores, edição de texto, quadros, progresso e exportação (`htmlFinal`).
 - `app/colar.js`: converte a colagem. HTML do Excel: aplica as regras do `<style>` (classes `.xlNN`) inline num iframe `sandbox="allow-same-origin"` sem scripts. Plano B: `semCss` com DOMParser. Também trata imagem e TSV.
-- `app/armazenamento.js`: IndexedDB `boletim-cds` / loja `dados`. Chaves: `slot:<id>`, `texto:<id>`, `competencia`, `extracao`, `ajuda-fechada`. Abertura com timeout de 3 s; sem IndexedDB, usa a memória.
+- `app/armazenamento.js`: IndexedDB `boletim-cds` / loja `dados`. Chaves: `slot:<id>`, `texto:<id>`, `cores`, `competencia`, `extracao`, `ajuda-fechada`. Abertura com timeout de 3 s; sem IndexedDB, usa a memória.
 - `app/imagens.js`: **gerado**. `python ferramentas/gerar_imagens_js.py` a partir de `imagens/`.
 
 ## Layout (imita o .docx)
 
 - `.pagina` = folha: cabeçalho com título dourado e 3 logos, `.moldura` com borda dourada e `.pagina-rodape` com a frase. As seções são agrupadas por `pagina` em `SECOES`.
-- `.fala` usa `display: contents`, e `.personagem` faz float para o lado (`clear: both`). Balão, texto e tabela são BFC (`flow-root`/flex) e encolhem ao lado do boneco. Duas tabelas `meia` seguidas viram `.par` (flex).
+- `.fala` usa `display: contents`, e `.personagem` faz float para o lado. `.fala.dir::before` limpa só a direita e `.fala.esq::before` só a esquerda: falas de lados opostos conversam sem buraco. Blocos depois de uma fala recebem `depois-esq`/`depois-dir` (em `montarBlocos`) e limpam o boneco do outro lado. Balão, texto e tabela são BFC (`flow-root`/flex) e encolhem ao lado do boneco. Duas tabelas `meia` seguidas viram `.par` (flex).
+- Rabicho do balão: `::before` (triângulo escuro) + `::after` (triângulo branco que também apaga a borda), em `top: 50%`, com `.balao { min-height: 64px }` para cair no trecho reto da borda. Não voltar ao quadrado girado: ele pegava a curva do canto e abria.
+- Cores: `CORES_TEXTO` (bolinhas da barrinha de edição, marcação `{cor:nome|#hex}...{/cor}`) e `CORES_GERAIS` (variáveis `--ouro-texto`, `--ouro-forte`, `--ouro`, `--tinta`, painel **Cores**). `htmlFinal` acrescenta `:root{...}` com as cores trocadas. Antes de exportar ou imprimir, `encerrarEdicoes()` chama `terminarEdicao` direto, porque o `blur()` nem sempre dispara e o texto sairia com a marcação crua.
 - Animações só em CSS, para funcionar no HTML exportado (que não tem script): `respirar`, `acenar`, `brilho`, e entrada com `animation-timeline: view()` dentro de `@supports`. Respeitam `prefers-reduced-motion` e são desligadas na impressão.
 - `editor.css` declara as próprias variáveis (`--borda`, `--azul`...), porque o `:root` do boletim não as tem.
 - Assets com `?v=N` no `index.html`: aumentar ao mudar `app/`, por causa do cache do Pages.

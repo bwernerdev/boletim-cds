@@ -15,6 +15,7 @@
     competencia: "",   // "2026-10"
     extracao: "",      // "2026-11-03"
     textos: {},        // id -> modelo alterado pelo usuário
+    cores: {},         // variável CSS -> cor escolhida (só as diferentes do padrão)
     slots: {},         // id -> { html, tipo, zoom, competencia, quando }
   };
 
@@ -51,10 +52,33 @@
     };
   }
 
-  // Modelo -> HTML: escapa, troca {marcadores}, **negrito**, pinta [pendências], quebra linhas.
+  // Cores prontas para trechos de texto: {cor:vermelho}trecho{/cor}.
+  // Também aceita código, como {cor:#ff0000}trecho{/cor}.
+  const CORES_TEXTO = {
+    vermelho: "#c00000",
+    verde: "#00873e",
+    azul: "#1f4e9a",
+    laranja: "#e46c0a",
+    preto: "#222222",
+    dourado: "#b07d00",
+  };
+  // Cores gerais do boletim (variáveis do CSS) que o usuário pode trocar.
+  const CORES_GERAIS = {
+    "--ouro-texto": { rotulo: "Texto dos balões", padrao: "#b07d00" },
+    "--ouro-forte": { rotulo: "Negrito", padrao: "#7a5600" },
+    "--ouro": { rotulo: "Título da folha e moldura", padrao: "#bf8f00" },
+    "--tinta": { rotulo: "Borda dos balões", padrao: "#333333" },
+  };
+
+  // Modelo -> HTML: escapa, troca {marcadores}, **negrito**, {cor:x}cor{/cor},
+  // pinta [pendências], quebra linhas.
   function renderizar(modelo, m = marcadores()) {
     return Colar.escapar(modelo)
       .replace(/\{(\w+)\}/g, (todo, chave) => (chave in m ? Colar.escapar(m[chave]) : todo))
+      .replace(/\{cor:(#[0-9a-fA-F]{6}|[a-z]+)\}([\s\S]*?)\{\/cor\}/g, (todo, cor, trecho) => {
+        const valor = cor.startsWith("#") ? cor : CORES_TEXTO[cor];
+        return valor ? `<span style="color:${valor}">${trecho}</span>` : trecho;
+      })
       .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
       .replace(/\[([^\]\n]+)\]/g, '<span class="pendente">$1</span>')
       .replace(/\n/g, "<br>");
@@ -105,23 +129,29 @@
       </section>`;
   }
 
-  // Duas tabelas "meia" seguidas viram um par lado a lado.
+  // Duas tabelas "meia" seguidas viram um par lado a lado. Blocos depois de
+  // uma fala ganham "depois-esq"/"depois-dir" para ficar ao lado de quem fala.
   function montarBlocos(blocos, atraso) {
     let html = "";
+    let ladoFala = "";
     for (let i = 0; i < blocos.length; i++) {
       const b = blocos[i];
       const prox = blocos[i + 1];
-      if (b.largura === "meia" && prox && prox.largura === "meia") {
-        html += `<div class="par">${montarBloco(b, atraso)}${montarBloco(prox, atraso)}</div>`;
+      const depois = ladoFala ? `depois-${ladoFala}` : "";
+      if (b.tipo === "fala") {
+        ladoFala = b.lado === "dir" ? "dir" : "esq";
+        html += montarBloco(b, atraso);
+      } else if (b.largura === "meia" && prox && prox.largura === "meia") {
+        html += `<div class="par ${depois}">${montarBloco(b, atraso)}${montarBloco(prox, atraso)}</div>`;
         i++;
       } else {
-        html += montarBloco(b, atraso);
+        html += montarBloco(b, atraso, depois);
       }
     }
     return html;
   }
 
-  function montarBloco(b, atraso) {
+  function montarBloco(b, atraso, classe = "") {
     if (b.tipo === "fala") {
       const p = PERSONAGENS[b.personagem];
       return `
@@ -132,13 +162,13 @@
           <div class="balao">${editavel(b)}</div>
         </div>`;
     }
-    if (b.tipo === "texto") return `<div class="texto-livre">${editavel(b)}</div>`;
+    if (b.tipo === "texto") return `<div class="texto-livre ${classe}">${editavel(b)}</div>`;
     if (b.tipo === "link") {
       return `<div><a class="link-intranet" href="${Colar.escapar(b.href)}" target="_blank" rel="noopener">${Colar.escapar(b.texto)}</a></div>`;
     }
     if (b.tipo === "tabela") {
       return `
-        <figure class="slot" data-slot="${b.id}" tabindex="0"
+        <figure class="slot ${classe}" data-slot="${b.id}" tabindex="0"
                 aria-label="Quadro para colar: ${Colar.escapar(b.rotulo)}">
           <div class="slot-barra so-editor">
             <span class="slot-rotulo" data-marcador="${Colar.escapar(b.rotulo)}"></span>
@@ -287,6 +317,90 @@
     el.setAttribute("contenteditable", "plaintext-only");
     if (el.contentEditable !== "plaintext-only") el.setAttribute("contenteditable", "true");
     el.focus();
+    mostrarBarraTexto(el);
+  }
+
+  // ---------- Barra de formatação (aparece ao editar um texto) ----------
+
+  function criarBarraTexto() {
+    const barra = document.createElement("div");
+    barra.id = "barra-texto";
+    barra.className = "barra-texto so-editor";
+    barra.hidden = true;
+    barra.innerHTML =
+      `<button type="button" data-fmt="negrito" title="Negrito no trecho selecionado"><b>N</b></button>` +
+      Object.entries(CORES_TEXTO).map(([nome, cor]) =>
+        `<button type="button" class="amostra" data-cor="${nome}" title="Pintar de ${nome}" style="background:${cor}"></button>`).join("") +
+      `<span class="barra-texto-dica">Selecione um trecho e clique</span>`;
+    // mousedown sem foco: o texto continua em edição e a seleção não se perde.
+    barra.addEventListener("mousedown", (e) => e.preventDefault());
+    barra.addEventListener("click", (e) => {
+      const bt = e.target.closest("button");
+      const el = $(".editavel.editando");
+      if (!bt || !el) return;
+      const sel = window.getSelection();
+      const trecho = sel && el.contains(sel.anchorNode) ? sel.toString() : "";
+      const base = trecho || "texto";
+      const novo = bt.dataset.fmt === "negrito" ? `**${base}**` : `{cor:${bt.dataset.cor}}${base}{/cor}`;
+      if (!sel || !el.contains(sel.anchorNode)) {
+        const r = document.createRange();
+        r.selectNodeContents(el);
+        r.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(r);
+      }
+      document.execCommand("insertText", false, novo);
+    });
+    document.body.appendChild(barra);
+    return barra;
+  }
+
+  function mostrarBarraTexto(el) {
+    const barra = $("#barra-texto") || criarBarraTexto();
+    const r = el.getBoundingClientRect();
+    barra.hidden = false;
+    barra.style.left = `${Math.max(8, r.left + window.scrollX)}px`;
+    barra.style.top = `${Math.max(8, r.top + window.scrollY - barra.offsetHeight - 8)}px`;
+  }
+
+  function esconderBarraTexto() {
+    const barra = $("#barra-texto");
+    if (barra) barra.hidden = true;
+  }
+
+  // ---------- Cores gerais ----------
+
+  function aplicarCoresGerais() {
+    for (const [nome, def] of Object.entries(CORES_GERAIS)) {
+      const valor = estado.cores[nome];
+      if (valor) document.documentElement.style.setProperty(nome, valor);
+      else document.documentElement.style.removeProperty(nome);
+      const campo = $(`#painel-cores input[data-var="${nome}"]`);
+      if (campo) campo.value = valor || def.padrao;
+    }
+  }
+
+  function montarPainelCores() {
+    const painel = $("#painel-cores");
+    painel.innerHTML =
+      Object.entries(CORES_GERAIS).map(([nome, def]) =>
+        `<label><input type="color" data-var="${nome}" value="${def.padrao}"> ${def.rotulo}</label>`).join("") +
+      `<button type="button" class="secundario" id="botao-cores-padrao">Voltar às cores do Word</button>`;
+    painel.addEventListener("input", async (e) => {
+      const campo = e.target.closest("input[data-var]");
+      if (!campo) return;
+      const nome = campo.dataset.var;
+      if (campo.value.toLowerCase() === CORES_GERAIS[nome].padrao) delete estado.cores[nome];
+      else estado.cores[nome] = campo.value;
+      aplicarCoresGerais();
+      await Armazenamento.gravar("cores", estado.cores);
+    });
+    $("#botao-cores-padrao").addEventListener("click", async () => {
+      estado.cores = {};
+      aplicarCoresGerais();
+      await Armazenamento.apagar("cores");
+    });
+    aplicarCoresGerais();
   }
 
   async function terminarEdicao(el) {
@@ -294,6 +408,7 @@
     const id = el.dataset.texto;
     const novo = el.innerText.replace(/\u00a0/g, " ").replace(/\n{3,}/g, "\n\n").trim();
     el.classList.remove("editando");
+    esconderBarraTexto();
     el.removeAttribute("contenteditable");
     if (novo === blocoPorId.get(id).texto || !novo) {
       delete estado.textos[id];
@@ -337,7 +452,8 @@
         .forEach((a) => el.removeAttribute(a)));
     copia.querySelectorAll(".editavel").forEach((el) => el.classList.remove("editavel"));
     copia.querySelectorAll(".texto-alterado").forEach((el) => el.classList.remove("texto-alterado"));
-    const css = $("#estilo-boletim").textContent;
+    const coresTrocadas = Object.entries(estado.cores).map(([nome, valor]) => `${nome}:${valor}`).join(";");
+    const css = $("#estilo-boletim").textContent + (coresTrocadas ? `\n:root{${coresTrocadas}}` : "");
     const titulo = `Boletim Informativo – CDs MI – ${m.Mes}/${m.ano}`;
     return `<!doctype html>
 <html lang="pt-BR">
@@ -353,8 +469,14 @@
 </html>`;
   }
 
-  function exportar() {
-    $$(".editavel.editando").forEach((el) => el.blur());
+  // Encerra a edição em andamento direto (o blur nem sempre dispara), para o
+  // texto não sair com a marcação crua (**, {cor:...}).
+  async function encerrarEdicoes() {
+    for (const el of $$(".editavel.editando")) await terminarEdicao(el);
+  }
+
+  async function exportar() {
+    await encerrarEdicoes();
     if (!confirmarPendencias("Gerar o boletim")) return;
     const m = marcadores();
     const blob = new Blob([htmlFinal()], { type: "text/html;charset=utf-8" });
@@ -369,8 +491,8 @@
     avisar(`Boletim gerado: ${a.download}`);
   }
 
-  function imprimir() {
-    $$(".editavel.editando").forEach((el) => el.blur());
+  async function imprimir() {
+    await encerrarEdicoes();
     if (!confirmarPendencias("Imprimir")) return;
     // Quadros vazios não saem na impressão.
     const vazios = slotsPendentes();
@@ -490,6 +612,15 @@
       atualizarMarcadores();
       atualizarProgresso();
     });
+    montarPainelCores();
+    $("#botao-cores").addEventListener("click", () => {
+      const painel = $("#painel-cores");
+      painel.hidden = !painel.hidden;
+      $("#botao-cores").setAttribute("aria-expanded", String(!painel.hidden));
+    });
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest("#painel-cores, #botao-cores")) $("#painel-cores").hidden = true;
+    });
     $("#botao-exportar").addEventListener("click", exportar);
     $("#botao-pdf").addEventListener("click", imprimir);
     $("#botao-fechar-ajuda").addEventListener("click", () => {
@@ -513,6 +644,7 @@
         if (t) estado.textos[id] = t;
       }
     }
+    estado.cores = (await Armazenamento.ler("cores")) || {};
     if (await Armazenamento.ler("ajuda-fechada")) $("#ajuda").hidden = true;
     $("#campo-mes").value = estado.competencia;
     $("#campo-extracao").value = estado.extracao;

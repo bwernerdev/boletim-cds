@@ -27,7 +27,7 @@ O botão de progresso no topo mostra quantas tabelas do mês já foram coladas. 
 O layout segue o boletim do Word:
 - **Folhas:** 10 folhas, cada uma com moldura dourada, cabeçalho "Boletim Informativo {mês}/{ano}" com os logos Seara, Prevenção de Perdas e Controladoria, e a frase no rodapé.
 - **Títulos:** faixa dourada nas seções principais.
-- **Personagens:** grandes, com as tabelas e os textos seguintes ao lado deles enquanto houver altura.
+- **Personagens:** grandes, com as tabelas e os textos seguintes ao lado deles enquanto houver altura. Em duas falas seguidas de lados opostos, como Morlus e Lechinski, a segunda começa logo abaixo do primeiro balão, como numa conversa.
 - **Balões:** brancos, com borda escura, rabicho para o personagem e texto dourado com negrito.
 - **Ilustrações:** clarinhas no canto das seções, como marca d'água.
 
@@ -50,9 +50,16 @@ Clique em qualquer fala ou parágrafo para editar. `**assim**` sai em negrito. D
 
 Texto alterado fica salvo e ganha o botão **Voltar ao texto padrão**. Os textos padrão estão em `app/conteudo.js`.
 
+## Cores das fontes
+
+- **Um trecho:** clique no texto para editar e selecione o trecho. Na barrinha que aparece em cima, **N** põe negrito e cada bolinha pinta o trecho (vermelho, verde, azul, laranja, preto ou dourado). No texto em edição, isso aparece como `**trecho**` e `{cor:vermelho}trecho{/cor}`. Também dá para digitar um código de cor: `{cor:#ff0000}trecho{/cor}`.
+- **O boletim todo:** o botão **Cores**, na barra do topo, troca a cor do texto dos balões, do negrito, do título e da moldura das folhas, e da borda dos balões. **Voltar às cores do Word** desfaz.
+
+As duas opções ficam salvas e saem no boletim gerado e no PDF.
+
 ## O que fica salvo
 
-Tabelas coladas, textos alterados e o mês escolhido ficam no IndexedDB do navegador. Valem para aquele navegador, naquele computador. Em janela anônima nada é salvo. **Limpar tabelas** apaga só as tabelas; os textos alterados continuam.
+Tabelas coladas, textos alterados, cores escolhidas e o mês ficam no IndexedDB do navegador. Valem para aquele navegador, naquele computador. Em janela anônima nada é salvo. **Limpar tabelas** apaga só as tabelas; os textos alterados continuam.
 
 ## Pastas
 
