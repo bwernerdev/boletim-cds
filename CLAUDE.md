@@ -28,7 +28,7 @@ Editor HTML estático do Boletim Informativo mensal da Controladoria CDs MI. Sub
 
 ## Repositório
 
-Privado: `github.com/bwernerdev/boletim-cds`. O `gh` não está no PATH. Use o portátil do RPA: `RPA\ferramentas\gh\bin\gh.exe` com `$env:GH_CONFIG_DIR = "<projetos>\RPA\ferramentas\gh-config"`. O `git push` funciona direto, pelo Gerenciador de Credenciais.
+PÚBLICO `github.com/bwernerdev/boletim-cds` (tornado público em 13/11/2026, por decisão do usuário, para o Jorge testar pelo link). Site: https://bwernerdev.github.io/boletim-cds/. O GitHub Pages é publicado por `.github/workflows/pages.yml` a cada push em `main`. Tudo o que entra no repositório fica visível na internet: nada de números, planilhas ou boletins exportados (`.gitignore`). As tabelas coladas ficam só no navegador de quem usa. O `gh` não está no PATH. Use o portátil do RPA: `RPA\ferramentas\gh\bin\gh.exe` com `$env:GH_CONFIG_DIR = "<projetos>\RPA\ferramentas\gh-config"`. O `git push` funciona direto, pelo Gerenciador de Credenciais.
 
 ## Origem
 

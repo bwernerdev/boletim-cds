@@ -4,9 +4,13 @@ Editor para montar o **Boletim Informativo – CDs MI** da Controladoria. Antes,
 
 Roda no navegador, sem servidor e sem internet. Os dados ficam só no computador de quem usa.
 
+**Link:** https://bwernerdev.github.io/boletim-cds/
+
+O link só entrega a página. As tabelas coladas não saem do navegador de quem usa e não vão para o GitHub.
+
 ## Como usar (todo mês)
 
-1. Abra o `index.html` com dois cliques (Edge ou Chrome).
+1. Abra o link acima, ou o `index.html` com dois cliques (Edge ou Chrome). Cada endereço guarda os próprios dados: o que foi colado pelo link não aparece no arquivo local, e vice-versa.
 2. Na barra do topo, confira o **Mês do boletim**. Ele começa no mês anterior ao atual. Preencha também a **Extração Quirius**.
 3. Para cada quadro tracejado:
    - no Excel, selecione a tabela e copie (`Ctrl+C`);
@@ -45,6 +49,7 @@ Tabelas coladas, textos alterados e o mês escolhido ficam no IndexedDB do naveg
 | `app/` | Scripts do editor, conteúdo das seções e imagens embutidas. Ver `app/README.md`. |
 | `imagens/` | Personagens, logos e ilustrações em `.webp` (fonte do `app/imagens.js`). Ver `imagens/README.md`. |
 | `ferramentas/` | Script que gera `app/imagens.js`. Ver `ferramentas/README.md`. |
+| `.github/` | Publicação automática no GitHub Pages a cada push em `main`. Ver `.github/README.md`. |
 
 ## Trocar ou incluir personagem e imagem
 
