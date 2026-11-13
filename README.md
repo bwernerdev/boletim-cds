@@ -20,7 +20,13 @@ O link só entrega a página. As tabelas coladas não saem do navegador de quem 
 5. Revise os trechos em **amarelo**. Eles dependem dos números do mês, como os CDs fora da meta. Clique no texto para editar e apague os colchetes `[ ]` quando estiver certo.
 6. Clique em **Gerar boletim HTML**. Sai um arquivo único, `Boletim Informativo - CDs MI - MM-AAAA.html`, com imagens embutidas, pronto para enviar. **Imprimir / PDF** gera o PDF pelo navegador; escolha "Salvar como PDF".
 
-O botão de progresso no topo mostra quantas tabelas do mês já foram coladas. Clique nele para ir à próxima vazia. Um quadro com tabela de outro mês fica **amarelo** e não entra no boletim até receber a tabela nova.
+O botão de progresso no topo mostra quantas tabelas do mês já foram coladas. Clique nele para ir à próxima vazia. A linha fina embaixo da barra vai de amarelo a verde conforme o mês fica completo. Um quadro com tabela de outro mês fica **amarelo** e não entra no boletim até receber a tabela nova.
+
+**Índice das folhas:** em telas largas fica fixo à esquerda; nas menores abre pelo botão ☰. Mostra as 10 folhas, cada tabela com ✓ (colada), ○ (vazia) ou ! (de outro mês), e leva até ela com um clique.
+
+**Pré-visualizar** esconde tudo do editor e mostra o boletim como vai sair. **Voltar à edição** ou `Esc` volta.
+
+No celular e em telas estreitas, mês, extração e os botões secundários ficam no menu **⋯**. O ícone de lua alterna o modo escuro do editor; o boletim continua claro.
 
 ## Visual
 
@@ -33,7 +39,9 @@ O layout segue o boletim do Word:
 
 **Movimento:** os personagens "respiram" e acenam ao passar o mouse. Balões, tabelas e personagens entram ao rolar a página (no Edge e no Chrome), e a faixa do título tem um brilho que passa. Tudo some na impressão e para quem desliga as animações no sistema.
 
-Na impressão ou no PDF, cada folha vira uma página A4.
+Na impressão ou no PDF, cada folha vira uma página A4, com o mesmo layout da tela do computador. A folha que passaria da altura do A4 é reduzida para caber numa página só, tanto pelo botão **Imprimir / PDF** (ou `Ctrl+P`) quanto no HTML gerado.
+
+No celular, o boneco fica menor e em cima do balão, e a tabela larga rola para o lado, com sombra na borda que ainda tem conteúdo. Títulos, textos, logos e bonecos mudam de tamanho com a largura da folha.
 
 ## Textos
 

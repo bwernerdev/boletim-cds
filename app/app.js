@@ -87,20 +87,30 @@
 
   // ---------- Montagem da página ----------
 
+  // Agrupa as seções em folhas pelo número da página.
+  const PAGINAS = [];
+  for (const secao of SECOES) {
+    const ultima = PAGINAS[PAGINAS.length - 1];
+    if (ultima && ultima.numero === secao.pagina) ultima.secoes.push(secao);
+    else PAGINAS.push({ numero: secao.pagina, secoes: [secao] });
+  }
+  // Nome da folha no índice: título da primeira seção que tem faixa, ou o
+  // rótulo da primeira tabela.
+  PAGINAS.forEach((pg) => {
+    const comTitulo = pg.secoes.find((s) => s.titulo);
+    const tabela = pg.secoes.flatMap((s) => s.blocos).find((b) => b.tipo === "tabela");
+    pg.nome = comTitulo ? comTitulo.titulo : tabela ? tabela.rotulo : `Folha ${pg.numero}`;
+    pg.tabelas = pg.secoes.flatMap((s) => s.blocos).filter((b) => b.tipo === "tabela");
+  });
+
   function montar() {
     const raiz = $("#boletim");
     const m = marcadores();
-    // Agrupa as seções em folhas pelo número da página.
-    const paginas = [];
-    for (const secao of SECOES) {
-      const ultima = paginas[paginas.length - 1];
-      if (ultima && ultima.numero === secao.pagina) ultima.secoes.push(secao);
-      else paginas.push({ numero: secao.pagina, secoes: [secao] });
-    }
     let contadorFala = 0;
     const atraso = () => `animation-delay:-${((contadorFala++ * 1.7) % 5).toFixed(1)}s`;
-    raiz.innerHTML = paginas.map((pg) => `
-      <article class="pagina">
+    raiz.innerHTML = PAGINAS.map((pg) => `
+      <article class="pagina" id="folha-${pg.numero}">
+        <span class="pagina-numero so-editor">Folha ${pg.numero} de ${PAGINAS.length}</span>
         <header class="pagina-topo">
           <div class="titulos">
             <h1 data-marcador="${Colar.escapar(BOLETIM.titulo)}"></h1>
@@ -221,7 +231,16 @@
       .forEach((bt) => { bt.hidden = !dado; });
 
     if (!dado) {
-      conteudo.innerHTML = `<div class="slot-vazio so-editor">Clique aqui e cole (Ctrl+V) a tabela copiada do Excel<br>ou um print. Também dá para arrastar uma imagem.</div>`;
+      conteudo.innerHTML = `
+        <div class="slot-vazio so-editor">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 2.5h6v3H9zM9 11h6M9 15h4"/></svg>
+          <span class="slot-vazio-titulo">
+            <span class="quando-parado">Clique aqui e aperte <kbd>Ctrl</kbd> + <kbd>V</kbd></span>
+            <span class="quando-foco">Pronto: aperte <kbd>Ctrl</kbd> + <kbd>V</kbd></span>
+            <span class="quando-arrasta">Solte a imagem aqui</span>
+          </span>
+          <span class="slot-vazio-dica">Tabela copiada do Excel ou print · também dá para arrastar o arquivo</span>
+        </div>`;
       status.textContent = "vazio";
       return;
     }
@@ -304,8 +323,158 @@
   function atualizarProgresso() {
     const total = $$(".slot").length;
     const feitos = total - slotsPendentes().length;
-    $("#progresso-texto").textContent = `${feitos} de ${total} tabelas do mês`;
-    $("#progresso-barra").style.width = total ? `${(feitos / total) * 100}%` : "0";
+    const fracao = total ? feitos / total : 0;
+    $("#progresso-num").textContent = `${feitos}/${total}`;
+    $("#botao-proxima").setAttribute("aria-label", `${feitos} de ${total} tabelas do mês coladas. Ir para a próxima vazia`);
+    // De amarelo (nada colado) a verde (tudo colado).
+    $("#barra").style.setProperty("--cor-progresso", `hsl(${Math.round(40 + 100 * fracao)} 68% 40%)`);
+    $("#progresso-barra").style.width = `${fracao * 100}%`;
+    $("#linha-progresso").style.width = `${fracao * 100}%`;
+    atualizarIndice();
+  }
+
+  // ---------- Índice das folhas ----------
+
+  function estadoSlot(id) {
+    const d = estado.slots[id];
+    if (!d) return "vazio";
+    return d.competencia === estado.competencia ? "ok" : "antigo";
+  }
+
+  function atualizarIndice() {
+    const m = marcadores();
+    const total = $$(".slot").length;
+    const feitos = total - slotsPendentes().length;
+    $("#indice").innerHTML = `
+      <div class="indice-topo">
+        <strong>Folhas</strong>
+        <span class="indice-resumo">${feitos}/${total} tabelas</span>
+        <button type="button" class="icone indice-fechar" data-fechar-indice aria-label="Fechar índice">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <ol>${PAGINAS.map((pg) => {
+        const ok = pg.tabelas.filter((t) => estadoSlot(t.id) === "ok").length;
+        const completa = pg.tabelas.length && ok === pg.tabelas.length;
+        return `
+        <li class="indice-folha${completa ? " completa" : ""}${pg.numero === folhaAtual ? " atual" : ""}" data-folha="${pg.numero}">
+          <button type="button" data-ir-folha="${pg.numero}">
+            <span class="indice-n">${pg.numero}</span>
+            <span class="indice-nome">${Colar.escapar(textoSimples(pg.nome, m))}</span>
+            ${pg.tabelas.length ? `<span class="indice-conta">${ok}/${pg.tabelas.length}</span>` : ""}
+          </button>
+          ${pg.tabelas.length ? `<ul>${pg.tabelas.map((t) => `
+            <li><button type="button" class="estado-${estadoSlot(t.id)}" data-ir-slot="${t.id}" title="${Colar.escapar(textoSimples(t.rotulo, m))}">
+              <span class="marca"></span><span>${Colar.escapar(textoSimples(t.rotulo, m))}</span>
+            </button></li>`).join("")}</ul>` : ""}
+        </li>`;
+      }).join("")}</ol>`;
+  }
+
+  // Folha que está no meio da tela fica marcada no índice.
+  let folhaAtual = 1;
+  function observarFolhaAtual() {
+    if (!("IntersectionObserver" in window)) return;
+    const obs = new IntersectionObserver((entradas) => {
+      for (const e of entradas) {
+        if (!e.isIntersecting) continue;
+        folhaAtual = Number(e.target.id.replace("folha-", ""));
+        $$(".indice-folha").forEach((li) => li.classList.toggle("atual", Number(li.dataset.folha) === folhaAtual));
+      }
+    }, { rootMargin: "-45% 0px -50% 0px" });
+    $$(".pagina").forEach((pg) => obs.observe(pg));
+  }
+
+  const ehGaveta = () => window.matchMedia("(max-width: 1279px)").matches;
+  function abrirIndice(abrir) {
+    $("#indice").classList.toggle("aberto", abrir);
+    $("#indice-fundo").hidden = !abrir;
+    $("#botao-indice").setAttribute("aria-expanded", String(abrir));
+    if (abrir) $("#indice button")?.focus({ preventScroll: true });
+  }
+
+  function irPara(el) {
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: el.classList.contains("slot") ? "center" : "start" });
+    el.focus({ preventScroll: true });
+    if (ehGaveta()) abrirIndice(false);
+  }
+
+  // ---------- Menu "⋯", tema e pré-visualização ----------
+
+  function abrirMenu(abrir) {
+    $("#barra").classList.toggle("mais-aberta", abrir);
+    $("#botao-mais").setAttribute("aria-expanded", String(abrir));
+  }
+
+  // Tema do editor (o boletim continua claro). Fica no localStorage: é só
+  // preferência de quem usa e precisa valer antes de o IndexedDB abrir.
+  function lerTema() {
+    try { return localStorage.getItem("boletim-cds:tema") || ""; } catch (e) { return ""; }
+  }
+  function aplicarTema(tema) {
+    if (tema) document.documentElement.dataset.tema = tema;
+    else delete document.documentElement.dataset.tema;
+    const escuro = tema ? tema === "escuro" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const bt = $("#botao-tema");
+    $(".rotulo", bt).textContent = escuro ? "Modo claro" : "Modo escuro";
+    bt.title = escuro ? "Mudar o editor para o modo claro" : "Mudar o editor para o modo escuro";
+  }
+  function alternarTema() {
+    const atual = document.documentElement.dataset.tema
+      || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "escuro" : "claro");
+    const novo = atual === "escuro" ? "claro" : "escuro";
+    try { localStorage.setItem("boletim-cds:tema", novo); } catch (e) { /* janela anônima */ }
+    aplicarTema(novo);
+  }
+
+  async function alternarPrevia(ligar) {
+    if (ligar) await encerrarEdicoes();
+    document.body.classList.toggle("previa", ligar);
+    abrirMenu(false);
+    if (ligar) $("#botao-sair-previa").focus({ preventScroll: true });
+  }
+
+  // ---------- Impressão: cada folha numa página A4 ----------
+
+  // Na impressão o miolo da folha tem 900 px e zoom 0,81 (CSS). A folha que
+  // passaria da altura útil do A4 (281 mm ≈ 1062 px) ganha um zoom menor.
+  const ZOOM_IMPRESSAO = 0.81;
+  const ALTURA_A4 = 1050;
+  let impressaoPreparada = false;
+  let previaAntes = false;
+  // Mede cada folha como sai no papel (sem os quadros vazios, 900 px de
+  // largura) e devolve { "folha-N": zoom } só das que passam da altura.
+  function zoomsImpressao() {
+    const cl = document.body.classList;
+    const tinha = { previa: cl.contains("previa"), imprimindo: cl.contains("imprimindo") };
+    cl.add("previa", "imprimindo");
+    const zooms = {};
+    $$(".pagina").forEach((pg) => {
+      const antes = pg.style.zoom;
+      pg.style.zoom = "";
+      const altura = pg.offsetHeight;
+      pg.style.zoom = antes;
+      if (altura * ZOOM_IMPRESSAO > ALTURA_A4) zooms[pg.id] = Math.floor((ALTURA_A4 / altura) * 1000) / 1000;
+    });
+    if (!tinha.previa) cl.remove("previa");
+    if (!tinha.imprimindo) cl.remove("imprimindo");
+    return zooms;
+  }
+  function prepararImpressao() {
+    if (impressaoPreparada) return;
+    impressaoPreparada = true;
+    previaAntes = document.body.classList.contains("previa");
+    const zooms = zoomsImpressao();
+    document.body.classList.add("previa", "imprimindo");
+    $$(".pagina").forEach((pg) => { pg.style.zoom = zooms[pg.id] ? String(zooms[pg.id]) : ""; });
+  }
+  function desfazerImpressao() {
+    if (!impressaoPreparada) return;
+    impressaoPreparada = false;
+    document.body.classList.remove("imprimindo");
+    if (!previaAntes) document.body.classList.remove("previa");
+    $$(".pagina").forEach((pg) => { pg.style.zoom = ""; });
   }
 
   // ---------- Textos ----------
@@ -453,7 +622,12 @@
     copia.querySelectorAll(".editavel").forEach((el) => el.classList.remove("editavel"));
     copia.querySelectorAll(".texto-alterado").forEach((el) => el.classList.remove("texto-alterado"));
     const coresTrocadas = Object.entries(estado.cores).map(([nome, valor]) => `${nome}:${valor}`).join(";");
-    const css = $("#estilo-boletim").textContent + (coresTrocadas ? `\n:root{${coresTrocadas}}` : "");
+    // Folhas altas ganham zoom menor na impressão, para caber numa página A4
+    // também quando o PDF é feito a partir do HTML gerado (que não tem script).
+    const zooms = Object.entries(zoomsImpressao()).map(([id, z]) => `#${id}{zoom:${z}}`).join("");
+    const css = $("#estilo-boletim").textContent
+      + (coresTrocadas ? `\n:root{${coresTrocadas}}` : "")
+      + (zooms ? `\n@media print{${zooms}}` : "");
     const titulo = `Boletim Informativo – CDs MI – ${m.Mes}/${m.ano}`;
     return `<!doctype html>
 <html lang="pt-BR">
@@ -494,11 +668,11 @@
   async function imprimir() {
     await encerrarEdicoes();
     if (!confirmarPendencias("Imprimir")) return;
-    // Quadros vazios não saem na impressão.
-    const vazios = slotsPendentes();
-    vazios.forEach((fig) => { fig.style.display = "none"; });
+    abrirMenu(false);
+    // Quadros vazios saem da impressão pela classe "previa".
+    prepararImpressao();
     window.print();
-    vazios.forEach((fig) => { fig.style.display = ""; });
+    desfazerImpressao();
   }
 
   // ---------- Aviso ----------
@@ -519,6 +693,7 @@
     const boletim = $("#boletim");
 
     boletim.addEventListener("click", (e) => {
+      if (document.body.classList.contains("previa")) return;
       const restaurar = e.target.closest("[data-restaurar]");
       if (restaurar) {
         const id = restaurar.dataset.restaurar;
@@ -575,7 +750,9 @@
       fig.classList.add("arrastando");
     });
     boletim.addEventListener("dragleave", (e) => {
-      e.target.closest(".slot")?.classList.remove("arrastando");
+      const fig = e.target.closest(".slot");
+      // Passar por cima de um filho do quadro também dispara dragleave.
+      if (fig && !fig.contains(e.relatedTarget)) fig.classList.remove("arrastando");
     });
     boletim.addEventListener("drop", (e) => {
       const fig = e.target.closest(".slot");
@@ -620,9 +797,52 @@
     });
     document.addEventListener("click", (e) => {
       if (!e.target.closest("#painel-cores, #botao-cores")) $("#painel-cores").hidden = true;
+      if (!e.target.closest("#barra-mais, #botao-mais")) abrirMenu(false);
     });
-    $("#botao-exportar").addEventListener("click", exportar);
+    $("#botao-exportar").addEventListener("click", () => { abrirMenu(false); exportar(); });
     $("#botao-pdf").addEventListener("click", imprimir);
+    // Ctrl+P também passa pelo ajuste das folhas ao A4.
+    window.addEventListener("beforeprint", prepararImpressao);
+    window.addEventListener("afterprint", desfazerImpressao);
+
+    // Menu "⋯" (telas menores)
+    $("#botao-mais").addEventListener("click", () => abrirMenu(!$("#barra").classList.contains("mais-aberta")));
+
+    // Índice das folhas
+    $("#botao-indice").addEventListener("click", () => abrirIndice(!$("#indice").classList.contains("aberto")));
+    $("#indice-fundo").addEventListener("click", () => abrirIndice(false));
+    $("#indice").addEventListener("click", (e) => {
+      if (e.target.closest("[data-fechar-indice]")) { abrirIndice(false); return; }
+      const folha = e.target.closest("[data-ir-folha]");
+      if (folha) { irPara($(`#folha-${folha.dataset.irFolha}`)); return; }
+      const slot = e.target.closest("[data-ir-slot]");
+      if (slot) irPara($(`.slot[data-slot="${slot.dataset.irSlot}"]`));
+    });
+
+    // Tema e pré-visualização
+    $("#botao-tema").addEventListener("click", alternarTema);
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => aplicarTema(lerTema()));
+    $("#botao-previa").addEventListener("click", () => alternarPrevia(true));
+    $("#botao-sair-previa").addEventListener("click", () => alternarPrevia(false));
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (document.body.classList.contains("previa")) alternarPrevia(false);
+      if ($("#indice").classList.contains("aberto")) abrirIndice(false);
+      if ($("#barra").classList.contains("mais-aberta")) abrirMenu(false);
+    });
+
+    // Altura da barra fixa: o índice e as rolagens começam abaixo dela.
+    const barra = $("#barra");
+    const medirBarra = () => document.documentElement.style.setProperty("--barra-h", `${barra.offsetHeight}px`);
+    if ("ResizeObserver" in window) new ResizeObserver(medirBarra).observe(barra);
+    medirBarra();
+
+    // Botões só com ícone: o nome aparece na dica.
+    $$(".barra button").forEach((bt) => {
+      const rotulo = $(".rotulo", bt);
+      if (rotulo && !bt.title) bt.title = rotulo.textContent.trim();
+    });
     $("#botao-fechar-ajuda").addEventListener("click", () => {
       $("#ajuda").hidden = true;
       Armazenamento.gravar("ajuda-fechada", true);
@@ -650,7 +870,10 @@
     $("#campo-extracao").value = estado.extracao;
     montar();
     ligarEventos();
+    observarFolhaAtual();
   }
+
+  aplicarTema(lerTema());
 
   iniciar();
 })();

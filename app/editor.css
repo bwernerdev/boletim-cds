@@ -1,41 +1,61 @@
 /* Estilos só do editor. A exportação remove tudo com a classe .so-editor
    e não leva este arquivo. */
 
+/* Cores de dentro da folha (quadros de colar, botões dos quadros): a folha é
+   sempre branca, inclusive no modo escuro. */
 :root {
   --azul: #1f3864;
   --azul-claro: #2f5496;
   --vermelho: #d71920;
+  --verde: #2e9d4f;
   --borda: #d9dee8;
   --balao: #f4f7fc;
   --texto-suave: #5b6578;
+  /* Cores da moldura do editor (barra, índice, ajuda): mudam no modo escuro. */
+  --e-fundo: #e9e6df;
+  --e-barra: rgba(255, 255, 255, .9);
+  --e-superficie: #ffffff;
+  --e-superficie-2: #f2f4f8;
+  --e-texto: #1d2433;
+  --e-suave: #5b6578;
+  --e-borda: #d9dee8;
+  --e-destaque: #1f3864;
+  --e-sombra: rgba(20, 35, 70, .16);
+}
+/* Modo escuro: segue o sistema, a não ser que o usuário escolha no botão. */
+:root[data-tema="escuro"] {
+  --e-fundo: #14171d;
+  --e-barra: rgba(29, 33, 41, .92);
+  --e-superficie: #1d2129;
+  --e-superficie-2: #2a2f3a;
+  --e-texto: #e6e9ef;
+  --e-suave: #9aa3b2;
+  --e-borda: #353b47;
+  --e-destaque: #9db8ff;
+  --e-sombra: rgba(0, 0, 0, .5);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --e-fundo: #14171d;
+    --e-barra: rgba(29, 33, 41, .92);
+    --e-superficie: #1d2129;
+    --e-superficie-2: #2a2f3a;
+    --e-texto: #e6e9ef;
+    --e-suave: #9aa3b2;
+    --e-borda: #353b47;
+    --e-destaque: #9db8ff;
+    --e-sombra: rgba(0, 0, 0, .5);
+    color-scheme: dark;
+  }
+}
+@media screen {
+  body { background: var(--e-fundo); transition: background .2s; }
+  /* Âncora das rolagens: não fica escondido atrás da barra fixa. */
+  .pagina, .slot { scroll-margin-top: calc(var(--barra-h, 64px) + 16px); }
 }
 
-.barra {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px 20px;
-  padding: 10px 24px;
-  background: #fff;
-  border-bottom: 1px solid var(--borda);
-  box-shadow: 0 1px 6px rgba(20, 35, 70, .08);
-  font-size: 13px;
-}
-.barra-titulo strong { display: block; font-size: 16px; color: var(--azul); }
-.barra-titulo span { color: var(--texto-suave); }
-.barra label { display: flex; flex-direction: column; gap: 2px; color: var(--texto-suave); }
-.barra input {
-  font: inherit;
-  font-size: 14px;
-  padding: 5px 8px;
-  border: 1px solid var(--borda);
-  border-radius: 6px;
-  color: var(--texto);
-}
-.barra-acoes { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+/* ---------- Botões ---------- */
 button {
   font: inherit;
   font-size: 14px;
@@ -43,53 +63,279 @@ button {
   border: 1px solid var(--azul);
   background: var(--azul);
   color: #fff;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 7px 14px;
+  transition: background .15s, border-color .15s, color .15s, transform .1s;
 }
 button:hover { background: var(--azul-claro); }
-button.secundario { background: #fff; color: var(--azul); }
-button.secundario:hover { background: var(--balao); }
+button:active { transform: translateY(1px); }
+button.secundario { background: #fff; color: var(--azul); border-color: var(--borda); }
+button.secundario:hover { background: var(--balao); border-color: var(--azul-claro); }
 button:focus-visible, .slot:focus-visible, [contenteditable]:focus-visible { outline: 3px solid #f2a900; outline-offset: 2px; }
+button svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+button svg circle { fill: currentColor; stroke: none; }
+button.icone {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  background: transparent;
+  border-color: transparent;
+  color: var(--e-texto);
+}
+button.icone:hover { background: var(--e-superficie-2); }
+button.icone svg { width: 22px; height: 22px; }
+
+/* ---------- Barra do topo ---------- */
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 8px 20px;
+  background: var(--e-barra);
+  -webkit-backdrop-filter: saturate(1.4) blur(10px);
+  backdrop-filter: saturate(1.4) blur(10px);
+  border-bottom: 1px solid var(--e-borda);
+  box-shadow: 0 1px 8px var(--e-sombra);
+  font-size: 13px;
+  color: var(--e-texto);
+}
+.barra-titulo { line-height: 1.2; white-space: nowrap; }
+.barra-titulo strong { display: block; font-size: 16px; color: var(--e-destaque); }
+.barra-titulo span { color: var(--e-suave); }
+.barra label { display: flex; flex-direction: column; gap: 2px; color: var(--e-suave); }
+.barra input {
+  font: inherit;
+  font-size: 14px;
+  padding: 5px 8px;
+  border: 1px solid var(--e-borda);
+  border-radius: 8px;
+  background: var(--e-superficie);
+  color: var(--e-texto);
+}
+.barra button { display: inline-flex; align-items: center; gap: 7px; }
+.barra button.secundario { background: var(--e-superficie); color: var(--e-destaque); border-color: var(--e-borda); }
+.barra button.secundario:hover { background: var(--e-superficie-2); border-color: var(--e-destaque); }
+/* No computador o conteúdo do menu "⋯" fica solto na barra. */
+.barra-mais { display: contents; }
+.barra-acoes { position: relative; display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+#botao-mais { display: none; }
+/* O botão de tema só mostra o ícone (o nome fica na dica). */
+#botao-tema .rotulo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .botao-progresso {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 4px;
-  min-width: 170px;
-  background: #fff;
-  color: var(--texto);
-  border-color: var(--borda);
+  gap: 5px;
+  min-width: 160px;
+  background: var(--e-superficie);
+  color: var(--e-texto);
+  border-color: var(--e-borda);
   font-size: 13px;
+  text-align: left;
 }
-.botao-progresso:hover { background: var(--balao); }
-.progresso { display: block; height: 6px; background: var(--borda); border-radius: 3px; overflow: hidden; }
-.progresso span { display: block; height: 100%; width: 0; background: #2e9d4f; transition: width .3s; }
+.barra .botao-progresso { display: flex; align-items: stretch; gap: 5px; }
+.botao-progresso:hover { background: var(--e-superficie-2); }
+.progresso-linha1 b { font-size: 14px; }
+.progresso { display: block; height: 6px; background: var(--e-superficie-2); border-radius: 3px; overflow: hidden; }
+.progresso span, .linha-progresso span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--cor-progresso, var(--verde));
+  transition: width .4s ease, background .4s ease;
+}
+/* Linha fina na base da barra: de amarelo (começo) a verde (completo). */
+.linha-progresso { position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; pointer-events: none; }
 
+/* Botões secundários só com ícone em telas médias (o nome fica na dica). */
+@media screen and (max-width: 1439px) {
+  .barra-acoes .rotulo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .barra-acoes button.secundario { padding: 7px 9px; }
+}
+/* Telas menores: mês, extração e botões secundários vão para o menu "⋯". */
+@media screen and (max-width: 1099px) {
+  #botao-mais { display: inline-grid; }
+  .barra-mais {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 12px;
+    z-index: 30;
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    width: min(320px, calc(100vw - 24px));
+    padding: 14px;
+    background: var(--e-superficie);
+    border: 1px solid var(--e-borda);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px var(--e-sombra);
+  }
+  .barra.mais-aberta .barra-mais { display: flex; animation: abrir-menu .16s ease-out; }
+  .barra-mais input { width: 100%; }
+  .barra-mais .barra-acoes { flex-direction: column; align-items: stretch; margin: 0; }
+  .barra-acoes .rotulo, #botao-tema .rotulo { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+  .barra-acoes button.secundario { justify-content: flex-start; padding: 8px 12px; }
+  .barra-mais .painel-cores { position: static; min-width: 0; box-shadow: none; }
+  #botao-exportar { margin-left: auto; }
+}
+@keyframes abrir-menu { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+/* Celular: barra numa linha só. */
+@media screen and (max-width: 760px) {
+  .barra { gap: 8px; padding: 6px 10px; }
+  .barra-titulo span { display: none; }
+  .barra-titulo strong { font-size: 15px; }
+  .botao-progresso { min-width: 0; flex: 1; max-width: 140px; padding: 6px 10px; }
+  .botao-progresso .rotulo { display: none; }
+  #botao-exportar { padding: 0; width: 38px; height: 38px; justify-content: center; }
+  #botao-exportar .rotulo { display: none; }
+  .ajuda { margin: 12px 8px 0; }
+}
+
+/* ---------- Índice das folhas ---------- */
+.indice {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 9;
+  width: 264px;
+  padding: calc(var(--barra-h, 64px) + 12px) 10px 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--e-superficie);
+  border-right: 1px solid var(--e-borda);
+  color: var(--e-texto);
+  font-size: 13px;
+  scrollbar-width: thin;
+}
+.indice-topo { display: flex; align-items: center; gap: 8px; padding: 0 6px 10px; }
+.indice-topo strong { font-size: 15px; }
+.indice-resumo { margin-left: auto; color: var(--e-suave); font-weight: 600; white-space: nowrap; }
+.indice .indice-fechar { display: none; }
+.indice ol, .indice ul { list-style: none; margin: 0; padding: 0; }
+.indice button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-size: 13px;
+  text-align: left;
+}
+.indice button:hover { background: var(--e-superficie-2); }
+.indice-folha { margin-bottom: 2px; }
+.indice-folha > button { font-weight: 600; }
+.indice-n {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--e-superficie-2);
+  color: var(--e-suave);
+  font-size: 12px;
+}
+.indice-folha.completa .indice-n { background: var(--verde); color: #fff; }
+.indice-folha.atual > button { background: var(--e-superficie-2); box-shadow: inset 3px 0 0 #bf8f00; }
+.indice-nome { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.indice-conta { color: var(--e-suave); font-weight: 400; font-size: 12px; }
+.indice-folha ul { margin: 0 0 6px 18px; padding-left: 12px; border-left: 1px solid var(--e-borda); }
+.indice-folha ul button { padding: 4px 8px; color: var(--e-suave); }
+.indice-folha ul button span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.marca {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--e-suave);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+.estado-ok .marca { background: var(--verde); border-color: var(--verde); color: #fff; }
+.estado-ok .marca::before { content: "✓"; }
+.estado-antigo .marca { background: #f2a900; border-color: #f2a900; color: #fff; }
+.estado-antigo .marca::before { content: "!"; }
+.estado-ok { color: var(--e-texto) !important; }
+
+/* Telas largas: índice fixo à esquerda e boletim ao lado. */
+@media screen and (min-width: 1280px) {
+  #botao-indice, .indice-fundo { display: none !important; }
+  .boletim { margin-left: max(280px, calc(50% - 500px)); margin-right: auto; }
+  body > .ajuda { max-width: 968px; margin-left: calc(max(280px, calc(50% - 500px)) + 16px); margin-right: auto; }
+}
+/* Telas menores: índice vira gaveta, aberta pelo botão ☰. */
+@media screen and (max-width: 1279px) {
+  .indice {
+    z-index: 40;
+    width: min(300px, 86vw);
+    padding-top: 14px;
+    transform: translateX(-105%);
+    transition: transform .25s ease;
+    box-shadow: 8px 0 32px var(--e-sombra);
+    visibility: hidden;
+  }
+  .indice.aberto { transform: none; visibility: visible; }
+  .indice .indice-fechar { display: inline-grid; }
+  .indice-fundo { position: fixed; inset: 0; z-index: 35; background: rgba(0, 0, 0, .35); }
+}
+
+/* ---------- Ajuda ---------- */
 .ajuda {
   position: relative;
   max-width: 1180px;
   margin: 16px auto 0;
   padding: 12px 44px 12px 16px;
-  background: #fff;
-  border: 1px solid var(--borda);
-  border-left: 4px solid var(--azul);
-  border-radius: 8px;
+  background: var(--e-superficie);
+  color: var(--e-texto);
+  border: 1px solid var(--e-borda);
+  border-left: 4px solid var(--e-destaque);
+  border-radius: 10px;
   font-size: 14px;
 }
-.ajuda code { background: var(--balao); padding: 0 4px; border-radius: 3px; }
+.ajuda code { background: var(--e-superficie-2); padding: 0 4px; border-radius: 3px; }
 .ajuda button {
   position: absolute;
   top: 6px;
   right: 6px;
   padding: 2px 10px;
   background: transparent;
-  color: var(--texto-suave);
+  color: var(--e-suave);
   border: 0;
   font-size: 20px;
 }
 
-/* Textos editáveis */
+/* Número da folha (só no editor), no alto da folha. */
+.pagina { position: relative; }
+.pagina-numero {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 12px;
+  border-radius: 999px;
+  background: var(--e-superficie);
+  border: 1px solid var(--e-borda);
+  color: var(--e-suave);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 1px 4px var(--e-sombra);
+}
+
+/* ---------- Textos editáveis ---------- */
 .editavel { cursor: text; border-radius: 4px; transition: background .15s; }
 .editavel:hover { background: rgba(47, 84, 150, .07); }
 .editavel.editando {
@@ -111,16 +357,33 @@ button:focus-visible, .slot:focus-visible, [contenteditable]:focus-visible { out
 }
 .texto-alterado .restaurar { display: inline-block; }
 
-/* Quadros de colar */
+/* ---------- Quadros de colar ---------- */
 .slot {
   border: 2px dashed var(--borda);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 10px;
-  transition: border-color .15s, background .15s;
+  transition: border-color .15s, background-color .15s, box-shadow .15s;
 }
-.slot:focus, .slot.arrastando { border-color: var(--azul-claro); background: #f7f9fd; outline: none; }
+.slot:hover { border-color: #b9c4d8; }
+.slot:focus, .slot.arrastando { border-color: var(--azul-claro); background-color: #f5f8fe; outline: none; box-shadow: 0 0 0 4px rgba(47, 84, 150, .14); }
 .slot.preenchido { border-style: solid; border-color: #cfe8d6; }
-.slot.antigo { border-color: #f2a900; background: #fffbea; }
+.slot.preenchido:focus { border-color: var(--azul-claro); }
+.slot.antigo { border-color: #f2a900; background-color: #fffbea; }
+/* Imagem arrastada por cima: borda tracejada andando. */
+.slot.arrastando {
+  border-color: transparent;
+  background-image:
+    linear-gradient(90deg, var(--azul-claro) 50%, transparent 0),
+    linear-gradient(90deg, var(--azul-claro) 50%, transparent 0),
+    linear-gradient(0deg, var(--azul-claro) 50%, transparent 0),
+    linear-gradient(0deg, var(--azul-claro) 50%, transparent 0);
+  background-size: 16px 2px, 16px 2px, 2px 16px, 2px 16px;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-position: 0 0, 0 100%, 0 0, 100% 0;
+  background-origin: border-box;
+  animation: formigas .6s linear infinite;
+}
+@keyframes formigas { to { background-position: 16px 0, -16px 100%, 0 -16px, 100% 16px; } }
 .slot-barra {
   display: flex;
   flex-wrap: wrap;
@@ -130,23 +393,57 @@ button:focus-visible, .slot:focus-visible, [contenteditable]:focus-visible { out
   font-size: 13px;
   color: var(--texto-suave);
 }
-.slot-barra .slot-rotulo { font-weight: 600; color: var(--texto); }
+.slot-barra .slot-rotulo { font-weight: 600; color: #1d2433; }
 .slot-barra .slot-status { flex: 1; white-space: nowrap; }
 .slot.antigo .slot-status { color: #9a6a00; font-weight: 600; }
 .slot-barra button { padding: 2px 9px; font-size: 13px; }
 .slot-vazio {
-  display: grid;
-  place-items: center;
-  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 120px;
   border-radius: 8px;
-  background: repeating-linear-gradient(45deg, #fafbfd, #fafbfd 10px, #f3f5f9 10px, #f3f5f9 20px);
+  background: #f7f9fc;
   color: var(--texto-suave);
   text-align: center;
-  padding: 12px;
+  padding: 14px;
   cursor: pointer;
 }
-.slot:focus .slot-vazio { color: var(--azul); font-weight: 600; }
+.slot-vazio svg {
+  width: 34px;
+  height: 34px;
+  margin-bottom: 4px;
+  fill: none;
+  stroke: #8a9ab8;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform .2s, stroke .2s;
+}
+.slot:hover .slot-vazio svg, .slot:focus .slot-vazio svg { transform: translateY(-2px); stroke: var(--azul-claro); }
+.slot-vazio-titulo { font-size: 15px; font-weight: 600; color: #1d2433; }
+.slot-vazio-dica { font-size: 13px; }
+.slot-vazio kbd {
+  display: inline-block;
+  padding: 0 6px;
+  border: 1px solid #c5cddb;
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: #fff;
+  font: 600 12px/1.6 Consolas, monospace;
+  color: #1d2433;
+}
+/* O texto do quadro muda: parado, clicado (pronto para colar) e arrastando. */
+.slot-vazio .quando-foco, .slot-vazio .quando-arrasta { display: none; }
+.slot:focus .slot-vazio .quando-parado { display: none; }
+.slot:focus .slot-vazio .quando-foco { display: inline; color: var(--azul); }
+.slot.arrastando .slot-vazio .quando-parado, .slot.arrastando .slot-vazio .quando-foco { display: none; }
+.slot.arrastando .slot-vazio .quando-arrasta { display: inline; color: var(--azul); }
+.slot.arrastando .slot-vazio { background: transparent; }
 
+/* ---------- Aviso ---------- */
 .aviso {
   position: fixed;
   left: 50%;
@@ -154,32 +451,51 @@ button:focus-visible, .slot:focus-visible, [contenteditable]:focus-visible { out
   transform: translate(-50%, 20px);
   max-width: min(560px, calc(100% - 32px));
   padding: 10px 18px;
-  border-radius: 8px;
-  background: var(--texto);
+  border-radius: 10px;
+  background: #1d2433;
   color: #fff;
   font-size: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
   opacity: 0;
   pointer-events: none;
   transition: opacity .2s, transform .2s;
-  z-index: 20;
+  z-index: 60;
 }
 .aviso.mostrar { opacity: 1; transform: translate(-50%, 0); }
 .aviso.erro { background: var(--vermelho); }
 
-@media (max-width: 720px) {
-  .barra { padding: 10px 16px; position: static; }
-  .barra-acoes { margin-left: 0; }
-  .ajuda { margin: 12px 16px 0; }
+/* ---------- Pré-visualização: o boletim como vai sair ---------- */
+.sair-previa { display: none; }
+body.previa .so-editor { display: none !important; }
+body.previa .sair-previa {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 9px 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .25);
 }
+body.previa .boletim { margin-left: auto; margin-right: auto; }
+body.previa .slot { border: 0; padding: 0; background: none; box-shadow: none; animation: none; }
+body.previa .slot:not(.preenchido), body.previa .slot.antigo { display: none; }
+body.previa .pendente { background: none; padding: 0; }
+body.previa .editavel { cursor: default; }
+body.previa .editavel:hover { background: none; }
+/* Usado ao imprimir: a folha fica com a largura do PDF para medir a altura. */
+body.imprimindo .pagina { width: 900px; padding: 0; }
+
 @media print {
-  .so-editor { display: none !important; }
-  .slot { border: 0; padding: 0; }
+  .so-editor, .sair-previa { display: none !important; }
+  .slot { border: 0; padding: 0; background: none; box-shadow: none; }
   .editavel:hover { background: none; }
   .pendente { background: none; }
 }
 
-/* Painel "Cores" (cores gerais do boletim) */
-.barra-acoes { position: relative; }
+/* ---------- Painel "Cores" (cores gerais do boletim) ---------- */
 .painel-cores {
   position: absolute;
   top: calc(100% + 8px);
@@ -189,17 +505,18 @@ button:focus-visible, .slot:focus-visible, [contenteditable]:focus-visible { out
   gap: 8px;
   min-width: 260px;
   padding: 12px 14px;
-  background: #fff;
-  border: 1px solid var(--borda);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(20, 35, 70, .18);
+  background: var(--e-superficie);
+  color: var(--e-texto);
+  border: 1px solid var(--e-borda);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px var(--e-sombra);
   font-size: 14px;
 }
 .painel-cores[hidden] { display: none; }
-.barra .painel-cores label { display: flex; flex-direction: row; align-items: center; gap: 10px; color: var(--texto); cursor: pointer; }
-.painel-cores input[type="color"] { width: 36px; height: 28px; padding: 0 2px; border: 1px solid var(--borda); border-radius: 6px; background: #fff; cursor: pointer; }
+.barra .painel-cores label { display: flex; flex-direction: row; align-items: center; gap: 10px; color: var(--e-texto); cursor: pointer; }
+.painel-cores input[type="color"] { width: 36px; height: 28px; padding: 0 2px; border: 1px solid var(--e-borda); border-radius: 6px; background: #fff; cursor: pointer; }
 
-/* Barrinha de formatação que aparece ao editar um texto */
+/* ---------- Barrinha de formatação que aparece ao editar um texto ---------- */
 .barra-texto {
   position: absolute;
   z-index: 25;
@@ -209,12 +526,17 @@ button:focus-visible, .slot:focus-visible, [contenteditable]:focus-visible { out
   padding: 5px 8px;
   background: #fff;
   border: 1px solid var(--borda);
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0 4px 14px rgba(20, 35, 70, .18);
 }
 .barra-texto[hidden] { display: none; }
-.barra-texto button { padding: 2px 9px; background: #fff; color: var(--texto); border-color: var(--borda); }
+.barra-texto button { padding: 2px 9px; background: #fff; color: #1d2433; border-color: var(--borda); }
 .barra-texto button:hover { background: var(--balao); }
 .barra-texto .amostra { width: 22px; height: 22px; padding: 0; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--borda); }
 .barra-texto .amostra:hover { transform: scale(1.15); }
 .barra-texto-dica { font-size: 12px; color: var(--texto-suave); margin-left: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .slot.arrastando, .barra.mais-aberta .barra-mais { animation: none; }
+  .indice { transition: none; }
+}
