@@ -174,7 +174,7 @@
     }
     if (b.tipo === "texto") return `<div class="texto-livre ${classe}">${editavel(b)}</div>`;
     if (b.tipo === "link") {
-      return `<div><a class="link-intranet" href="${Colar.escapar(b.href)}" target="_blank" rel="noopener">${Colar.escapar(b.texto)}</a></div>`;
+      return `<div class="link-bloco"><a class="link-intranet" href="${Colar.escapar(b.href)}" target="_blank" rel="noopener">${Colar.escapar(b.texto)}</a></div>`;
     }
     if (b.tipo === "tabela") {
       return `
