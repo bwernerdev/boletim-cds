@@ -18,5 +18,5 @@ Depois de incluir ou trocar um arquivo aqui, rode `python ferramentas/gerar_imag
 | `controladoria.webp` | Logo Controladoria Administrativa CDs (cabeçalho das folhas) |
 | `seara.webp` | Logo Seara (cabeçalho das folhas) |
 | `prevencao.webp` | Logo Prevenção de Perdas (cabeçalho das folhas) |
-| `goal.webp`, `escada.webp`, `alerta.webp`, `inventario.webp`, `trofeus.webp` | Ilustrações clarinhas no canto das seções (marca d água) |
+| `goal.webp`, `escada.webp`, `alerta.webp`, `inventario.webp`, `trofeus.webp` | Ilustrações clarinhas no canto das seções (marca d'água) |
 | `setas.webp` | Ilustração de evolução (reserva, não usada ainda) |
