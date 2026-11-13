@@ -51,10 +51,11 @@
     };
   }
 
-  // Modelo -> HTML: escapa, troca {marcadores}, pinta [pendências], quebra linhas.
+  // Modelo -> HTML: escapa, troca {marcadores}, **negrito**, pinta [pendências], quebra linhas.
   function renderizar(modelo, m = marcadores()) {
     return Colar.escapar(modelo)
       .replace(/\{(\w+)\}/g, (todo, chave) => (chave in m ? Colar.escapar(m[chave]) : todo))
+      .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
       .replace(/\[([^\]\n]+)\]/g, '<span class="pendente">$1</span>')
       .replace(/\n/g, "<br>");
   }
@@ -65,42 +66,68 @@
   function montar() {
     const raiz = $("#boletim");
     const m = marcadores();
-    raiz.innerHTML = `
-      <header class="capa">
-        <img src="${img("controladoria")}" alt="Controladoria Administrativa CDs">
-        <div class="capa-texto">
-          <h1>Boletim Informativo</h1>
-          <p>Controladoria – CDs MI</p>
+    // Agrupa as seções em folhas pelo número da página.
+    const paginas = [];
+    for (const secao of SECOES) {
+      const ultima = paginas[paginas.length - 1];
+      if (ultima && ultima.numero === secao.pagina) ultima.secoes.push(secao);
+      else paginas.push({ numero: secao.pagina, secoes: [secao] });
+    }
+    let contadorFala = 0;
+    const atraso = () => `animation-delay:-${((contadorFala++ * 1.7) % 5).toFixed(1)}s`;
+    raiz.innerHTML = paginas.map((pg) => `
+      <article class="pagina">
+        <header class="pagina-topo">
+          <div class="titulos">
+            <h1 data-marcador="${Colar.escapar(BOLETIM.titulo)}"></h1>
+            <p>${Colar.escapar(BOLETIM.subtitulo)}</p>
+            <p>${Colar.escapar(BOLETIM.area)}</p>
+          </div>
+          <img src="${img("seara")}" alt="Seara">
+          <img src="${img("prevencao")}" alt="Prevenção de Perdas">
+          <img src="${img("controladoria")}" alt="Controladoria Administrativa CDs">
+        </header>
+        <div class="moldura">
+          ${pg.secoes.map((s) => montarSecao(s, atraso)).join("")}
         </div>
-        <div class="competencia" data-marcador="{Mes}/{ano}"></div>
-        <img src="${img("seara")}" alt="Seara">
-      </header>
-      <div class="faixa"></div>
-      ${SECOES.map(montarSecao).join("")}
-      <footer class="rodape" data-marcador="Controladoria CDs MI · Boletim de {mes} de {ano}"></footer>`;
+        <p class="pagina-rodape">${Colar.escapar(BOLETIM.rodape)}</p>
+      </article>`).join("");
     atualizarMarcadores(m);
     atualizarProgresso();
   }
 
-  function montarSecao(secao) {
+  function montarSecao(secao, atraso) {
     return `
       <section class="secao" id="secao-${secao.id}">
-        <div class="secao-topo">
-          <h2 data-marcador="${Colar.escapar(secao.titulo)}"></h2>
-          ${secao.deco ? `<img class="secao-deco" src="${img(secao.deco)}" alt="">` : ""}
-        </div>
-        <div class="blocos">${secao.blocos.map(montarBloco).join("")}</div>
+        ${secao.deco ? `<img class="secao-deco" src="${img(secao.deco)}" alt="">` : ""}
+        ${secao.titulo ? `<h2 class="faixa-titulo" data-marcador="${Colar.escapar(secao.titulo)}"></h2>` : ""}
+        ${montarBlocos(secao.blocos, atraso)}
       </section>`;
   }
 
-  function montarBloco(b) {
+  // Duas tabelas "meia" seguidas viram um par lado a lado.
+  function montarBlocos(blocos, atraso) {
+    let html = "";
+    for (let i = 0; i < blocos.length; i++) {
+      const b = blocos[i];
+      const prox = blocos[i + 1];
+      if (b.largura === "meia" && prox && prox.largura === "meia") {
+        html += `<div class="par">${montarBloco(b, atraso)}${montarBloco(prox, atraso)}</div>`;
+        i++;
+      } else {
+        html += montarBloco(b, atraso);
+      }
+    }
+    return html;
+  }
+
+  function montarBloco(b, atraso) {
     if (b.tipo === "fala") {
       const p = PERSONAGENS[b.personagem];
       return `
-        <div class="fala ${b.lado === "dir" ? "dir" : ""}">
+        <div class="fala ${b.lado === "dir" ? "dir" : "esq"}">
           <div class="personagem">
-            <img src="${img(b.personagem)}" alt="">
-            <b>${p.nome}</b><small>${p.cargo}</small>
+            <img src="${img(b.personagem)}" alt="${Colar.escapar(p.nome)}" style="${atraso()}">
           </div>
           <div class="balao">${editavel(b)}</div>
         </div>`;
@@ -111,7 +138,7 @@
     }
     if (b.tipo === "tabela") {
       return `
-        <figure class="slot ${b.largura === "meia" ? "meia" : ""}" data-slot="${b.id}" tabindex="0"
+        <figure class="slot" data-slot="${b.id}" tabindex="0"
                 aria-label="Quadro para colar: ${Colar.escapar(b.rotulo)}">
           <div class="slot-barra so-editor">
             <span class="slot-rotulo" data-marcador="${Colar.escapar(b.rotulo)}"></span>

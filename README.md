@@ -15,16 +15,29 @@ O link só entrega a página. As tabelas coladas não saem do navegador de quem 
 3. Para cada quadro tracejado:
    - no Excel, selecione a tabela e copie (`Ctrl+C`);
    - na página, clique no quadro e cole (`Ctrl+V`).
-   Cores, bordas e formatação condicional vêm junto. Para o Qlik ou outro sistema, tire um print (`Win+Shift+S`) e cole do mesmo jeito, ou arraste o arquivo de imagem para o quadro.
+   Cores, bordas e formatação condicional vêm junto. Para o Qlik ou outro sistema, tire um print (`Win+Shift+S`) e cole do mesmo jeito, ou arraste o arquivo de imagem para o quadro. O print é convertido para WebP e limitado a 1800 px de largura, para o boletim não ficar pesado: com 20 prints, cai de 12,6 MB para 4,8 MB.
 4. Se a tabela ficar larga demais, use **−**, **+** ou **Ajustar** no quadro. Ao colar, ela já encolhe para caber.
 5. Revise os trechos em **amarelo**. Eles dependem dos números do mês, como os CDs fora da meta. Clique no texto para editar e apague os colchetes `[ ]` quando estiver certo.
 6. Clique em **Gerar boletim HTML**. Sai um arquivo único, `Boletim Informativo - CDs MI - MM-AAAA.html`, com imagens embutidas, pronto para enviar. **Imprimir / PDF** gera o PDF pelo navegador; escolha "Salvar como PDF".
 
 O botão de progresso no topo mostra quantas tabelas do mês já foram coladas. Clique nele para ir à próxima vazia. Um quadro com tabela de outro mês fica **amarelo** e não entra no boletim até receber a tabela nova.
 
+## Visual
+
+O layout segue o boletim do Word:
+- **Folhas:** 10 folhas, cada uma com moldura dourada, cabeçalho "Boletim Informativo {mês}/{ano}" com os logos Seara, Prevenção de Perdas e Controladoria, e a frase no rodapé.
+- **Títulos:** faixa dourada nas seções principais.
+- **Personagens:** grandes, com as tabelas e os textos seguintes ao lado deles enquanto houver altura.
+- **Balões:** brancos, com borda escura, rabicho para o personagem e texto dourado com negrito.
+- **Ilustrações:** clarinhas no canto das seções, como marca d'água.
+
+**Movimento:** os personagens "respiram" e acenam ao passar o mouse. Balões, tabelas e personagens entram ao rolar a página (no Edge e no Chrome), e a faixa do título tem um brilho que passa. Tudo some na impressão e para quem desliga as animações no sistema.
+
+Na impressão ou no PDF, cada folha vira uma página A4.
+
 ## Textos
 
-Clique em qualquer fala ou parágrafo para editar. Durante a edição aparecem os marcadores, que trocam sozinhos com o mês:
+Clique em qualquer fala ou parágrafo para editar. `**assim**` sai em negrito. Durante a edição aparecem os marcadores, que trocam sozinhos com o mês:
 
 | Marcador | Exemplo (mês 10/2026) |
 | --- | --- |
@@ -59,4 +72,6 @@ Tabelas coladas, textos alterados e o mês escolhido ficam no IndexedDB do naveg
 
 ## Incluir ou mudar seção e tabela
 
-Edite `window.SECOES` em `app/conteudo.js`. Cada `tabela` precisa de um `id` único, porque é a chave da colagem salva. Trocar o `id` faz o quadro aparecer vazio.
+Edite `window.SECOES` em `app/conteudo.js`. O campo `pagina` diz em qual folha a seção entra. Cada bloco precisa de um `id` único, porque é a chave da colagem ou do texto salvo. Trocar o `id` faz o quadro aparecer vazio.
+
+Ao mudar qualquer arquivo de `app/`, aumente o `?v=` dos links no `index.html`. Assim o navegador de quem usa pega a versão nova, em vez da guardada em cache.

@@ -12,6 +12,15 @@ Editor HTML estático do Boletim Informativo mensal da Controladoria CDs MI. Sub
 - `app/armazenamento.js`: IndexedDB `boletim-cds` / loja `dados`. Chaves: `slot:<id>`, `texto:<id>`, `competencia`, `extracao`, `ajuda-fechada`. Abertura com timeout de 3 s; sem IndexedDB, usa a memória.
 - `app/imagens.js`: **gerado**. `python ferramentas/gerar_imagens_js.py` a partir de `imagens/`.
 
+## Layout (imita o .docx)
+
+- `.pagina` = folha: cabeçalho com título dourado e 3 logos, `.moldura` com borda dourada e `.pagina-rodape` com a frase. As seções são agrupadas por `pagina` em `SECOES`.
+- `.fala` usa `display: contents`, e `.personagem` faz float para o lado (`clear: both`). Balão, texto e tabela são BFC (`flow-root`/flex) e encolhem ao lado do boneco. Duas tabelas `meia` seguidas viram `.par` (flex).
+- Animações só em CSS, para funcionar no HTML exportado (que não tem script): `respirar`, `acenar`, `brilho`, e entrada com `animation-timeline: view()` dentro de `@supports`. Respeitam `prefers-reduced-motion` e são desligadas na impressão.
+- `editor.css` declara as próprias variáveis (`--borda`, `--azul`...), porque o `:root` do boletim não as tem.
+- Assets com `?v=N` no `index.html`: aumentar ao mudar `app/`, por causa do cache do Pages.
+- Prints colados viram WebP 0,92 com no máximo 1800 px (`Colar.comprimir`).
+
 ## Convenções
 
 - Sem build, sem dependências, sem CDN: precisa abrir com dois cliques (`file://`) na rede corporativa. Scripts clássicos (`<script src>`), não módulos ES (módulos não carregam em `file://`).
@@ -32,4 +41,4 @@ PÚBLICO `github.com/bwernerdev/boletim-cds` (tornado público em 13/11/2026, po
 
 ## Origem
 
-Modelo: `Boletim Informativo - CDs MI - 10-2025.docx` (15 seções, 9 personagens, cerca de 20 tabelas). Imagens extraídas do `.docx` e convertidas para `.webp`.
+Modelo: `Boletim Informativo - CDs MI - 10-2025.docx` (10 páginas, 9 personagens, 20 tabelas). Imagens extraídas do `.docx` e convertidas para `.webp`: personagens recortados e com até 640 px de altura. No Word, Arailton é o de terno (image15) e Ezequias o de barba grisalha (image17). Para ver as páginas do Word como imagem: COM `Word.Application`, `Panes(1).Pages(i).EnhMetaFileBits` em `.emf`, aberto com PIL.

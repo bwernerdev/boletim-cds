@@ -120,8 +120,34 @@ window.Colar = (() => {
     });
   }
 
+  // Prints em PNG pesam muito (20 prints deram 12 MB). Converte para WebP de
+  // alta qualidade e limita a largura; fica com o original se não diminuir.
+  const LARGURA_MAX = 1800;
+  async function comprimir(url) {
+    try {
+      const imagem = await new Promise((resolve, reject) => {
+        const el = new Image();
+        el.onload = () => resolve(el);
+        el.onerror = reject;
+        el.src = url;
+      });
+      const fator = Math.min(1, LARGURA_MAX / imagem.naturalWidth);
+      const tela = document.createElement("canvas");
+      tela.width = Math.round(imagem.naturalWidth * fator);
+      tela.height = Math.round(imagem.naturalHeight * fator);
+      const ctx = tela.getContext("2d");
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, tela.width, tela.height);
+      ctx.drawImage(imagem, 0, 0, tela.width, tela.height);
+      const webp = tela.toDataURL("image/webp", 0.92);
+      return webp.startsWith("data:image/webp") && webp.length < url.length ? webp : url;
+    } catch {
+      return url;
+    }
+  }
+
   async function deImagem(arquivo) {
-    const url = await lerArquivoComoUrl(arquivo);
+    const url = await comprimir(await lerArquivoComoUrl(arquivo));
     return { tipo: "imagem", html: `<img src="${url}" alt="">` };
   }
 

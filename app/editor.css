@@ -1,6 +1,15 @@
 /* Estilos só do editor. A exportação remove tudo com a classe .so-editor
    e não leva este arquivo. */
 
+:root {
+  --azul: #1f3864;
+  --azul-claro: #2f5496;
+  --vermelho: #d71920;
+  --borda: #d9dee8;
+  --balao: #f4f7fc;
+  --texto-suave: #5b6578;
+}
+
 .barra {
   position: sticky;
   top: 0;
