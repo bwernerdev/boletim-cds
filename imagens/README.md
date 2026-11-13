@@ -1,6 +1,6 @@
 # imagens/
 
-Imagens fixas do boletim, extraídas do `.docx` original e convertidas para `.webp`: personagens recortados nas bordas e com até 640 px de altura, as demais reduzidas. O nome do arquivo (sem extensão) é a chave usada em `app/conteudo.js`.
+Imagens fixas do boletim, extraídas do `.docx` original e convertidas para `.webp`: personagens recortados nas bordas e com até 640 px de altura; logos recortados sem a margem branca e com até 300 px de altura (no cabeçalho aparecem com 100 px), para ocupar o espaço todo; as demais reduzidas. O nome do arquivo (sem extensão) é a chave usada em `app/conteudo.js`.
 
 Depois de incluir ou trocar um arquivo aqui, rode `python ferramentas/gerar_imagens_js.py` para atualizar `app/imagens.js`.
 
