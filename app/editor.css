@@ -275,6 +275,7 @@ button.icone svg { width: 22px; height: 22px; }
 @media screen and (min-width: 1280px) {
   #botao-indice, .indice-fundo { display: none !important; }
   .boletim { margin-left: max(280px, calc(50% - 500px)); margin-right: auto; }
+  body > .alerta-salvar { max-width: 968px; margin-left: calc(max(280px, calc(50% - 500px)) + 16px); margin-right: auto; }
   body > .ajuda { max-width: 968px; margin-left: calc(max(280px, calc(50% - 500px)) + 16px); margin-right: auto; }
 }
 /* Telas menores: índice vira gaveta, aberta pelo botão ☰. */
@@ -463,6 +464,25 @@ button.icone svg { width: 22px; height: 22px; }
 }
 .aviso.mostrar { opacity: 1; transform: translate(-50%, 0); }
 .aviso.erro { background: var(--vermelho); }
+
+/* Faixa fixa quando o navegador não está salvando (app.js, alertarFalhaAoSalvar). */
+.alerta-salvar {
+  position: sticky;
+  top: var(--barra-h, 64px);
+  z-index: 10;
+  max-width: 1180px;
+  margin: 12px auto 0;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--vermelho);
+  color: #fff;
+  font-size: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .25);
+}
+.alerta-salvar[hidden] { display: none; }
+@media screen and (max-width: 760px) {
+  .alerta-salvar { margin: 12px 8px 0; }
+}
 
 /* ---------- Pré-visualização: o boletim como vai sair ---------- */
 .sair-previa { display: none; }

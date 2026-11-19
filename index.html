@@ -68,6 +68,18 @@ body {
   text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
   overflow: hidden;
 }
+/* Imagens fixas: o arquivo vem do fundo da classe .im-<nome> (definida uma vez
+   só em <style id="imagens-boletim">); a <img> traz só a proporção. O
+   print-color-adjust faz o fundo sair na impressão mesmo sem "Gráficos de
+   fundo" marcado. */
+.im {
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  forced-color-adjust: none;
+}
 .secao-deco { position: absolute; top: 46px; left: -8px; width: 150px; height: auto; opacity: .22; z-index: -1; pointer-events: none; }
 
 /* ---------- Falas ---------- */
@@ -248,8 +260,10 @@ body {
   .faixa-titulo, .link-intranet { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 </style>
+<!-- Imagens fixas, uma vez cada (preenchido pelo app.js; a exportação leva só as usadas). -->
+<style id="imagens-boletim"></style>
 <!-- Só o editor usa os estilos abaixo; a exportação não os leva. -->
-<link rel="stylesheet" href="app/editor.css?v=10">
+<link rel="stylesheet" href="app/editor.css?v=11">
 </head>
 <body>
 <!-- Barra do topo. No celular, mês, extração e os botões secundários vão para
@@ -312,6 +326,8 @@ body {
 <button type="button" class="sair-previa" id="botao-sair-previa">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg> Voltar à edição
 </button>
+<div class="alerta-salvar so-editor" id="alerta-salvar" role="alert" hidden></div>
+
 <div class="ajuda so-editor" id="ajuda">
   <b>Como montar:</b> no Excel, selecione a tabela e copie (Ctrl+C). Aqui, clique no quadro dela e cole (Ctrl+V).
   Para o Qlik ou outro sistema, tire um print (Win+Shift+S) e cole do mesmo jeito.
@@ -328,10 +344,10 @@ body {
 
 <div class="aviso so-editor" id="aviso" role="status" aria-live="polite"></div>
 
-<script src="app/imagens.js?v=10"></script>
-<script src="app/conteudo.js?v=10"></script>
-<script src="app/armazenamento.js?v=10"></script>
-<script src="app/colar.js?v=10"></script>
-<script src="app/app.js?v=10"></script>
+<script src="app/imagens.js?v=11"></script>
+<script src="app/conteudo.js?v=11"></script>
+<script src="app/armazenamento.js?v=11"></script>
+<script src="app/colar.js?v=11"></script>
+<script src="app/app.js?v=11"></script>
 </body>
 </html>

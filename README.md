@@ -11,7 +11,7 @@ O link só entrega a página. As tabelas coladas não saem do navegador de quem 
 ## Como usar (todo mês)
 
 1. Abra o link acima, ou o `index.html` com dois cliques (Edge ou Chrome). Cada endereço guarda os próprios dados: o que foi colado pelo link não aparece no arquivo local, e vice-versa.
-2. Na barra do topo, confira o **Mês do boletim**. Ele começa no mês anterior ao atual. Preencha também a **Extração Quirius**.
+2. Na barra do topo, confira o **Mês do boletim**. Ele começa no mês anterior ao atual e avança sozinho quando um mês novo começa (aparece um aviso, e a data da extração volta para hoje). Um mês escolhido à mão fica até o fim daquele mês. Preencha também a **Extração Quirius**.
 3. Para cada quadro tracejado:
    - no Excel, selecione a tabela e copie (`Ctrl+C`);
    - na página, clique no quadro e cole (`Ctrl+V`).
@@ -67,7 +67,9 @@ As duas opções ficam salvas e saem no boletim gerado e no PDF.
 
 ## O que fica salvo
 
-Tabelas coladas, textos alterados, cores escolhidas e o mês ficam no IndexedDB do navegador. Valem para aquele navegador, naquele computador. Em janela anônima nada é salvo. **Limpar tabelas** apaga só as tabelas; os textos alterados continuam.
+Tabelas coladas, textos alterados, cores escolhidas e o mês ficam no IndexedDB do navegador. Valem para aquele navegador, naquele computador. Em janela anônima nada é salvo.
+
+Se o navegador deixar de salvar (o banco não abre em 3 s, ou o espaço acaba), aparece uma **faixa vermelha** no topo. O que está na tela continua lá, mas some ao fechar a página: gere o boletim antes. Enquanto a faixa estiver aberta, fechar a aba pede confirmação. **Limpar tabelas** apaga só as tabelas; os textos alterados continuam.
 
 ## Pastas
 

@@ -9,7 +9,8 @@ Editor HTML estático do Boletim Informativo mensal da Controladoria CDs MI. Sub
 - `app/conteudo.js`: `PERSONAGENS` e `SECOES` (falas, textos, quadros de tabela). Textos com marcadores `{mes}`, `{ano}` etc.; `[trecho]` = pendente de revisão (amarelo).
 - `app/app.js`: monta a página, marcadores, edição de texto, quadros, progresso e exportação (`htmlFinal`).
 - `app/colar.js`: converte a colagem. HTML do Excel: aplica as regras do `<style>` (classes `.xlNN`) inline num iframe `sandbox="allow-same-origin"` sem scripts. Plano B: `semCss` com DOMParser. Também trata imagem e TSV.
-- `app/armazenamento.js`: IndexedDB `boletim-cds` / loja `dados`. Chaves: `slot:<id>`, `texto:<id>`, `cores`, `competencia`, `extracao`, `ajuda-fechada`. Abertura com timeout de 3 s; sem IndexedDB, usa a memória.
+- `app/armazenamento.js`: IndexedDB `boletim-cds` / loja `dados`. Chaves: `slot:<id>`, `texto:<id>`, `cores`, `competencia`, `competencia-em` (mês do calendário em que o mês do boletim foi escolhido), `extracao`, `ajuda-fechada`. Abertura com timeout de 3 s; sem IndexedDB, usa a memória. A gravação só conta no `oncomplete` da transação (o erro de espaço cheio vem no `abort`). `aoFalhar(fn)` avisa o app (`"abrir"` ou `"gravar"`), que mostra a faixa `#alerta-salvar` e liga o `beforeunload`.
+- Mês ao abrir (`carregarCompetencia`, app.js): o salvo vale se for >= o padrão (mês anterior ao atual) ou se foi escolhido neste mês do calendário; senão avança para o padrão, a extração volta para hoje e aparece um aviso.
 - `app/imagens.js`: **gerado**. `python ferramentas/gerar_imagens_js.py` a partir de `imagens/`.
 
 ## Layout (imita o .docx)
@@ -27,6 +28,7 @@ Editor HTML estático do Boletim Informativo mensal da Controladoria CDs MI. Sub
 - Pré-visualização: `body.previa` esconde `.so-editor`, os quadros vazios ou de outro mês e o amarelo das pendências.
 - Assets com `?v=N` no `index.html`: aumentar ao mudar `app/`, por causa do cache do Pages.
 - Prints colados viram WebP 0,92 com no máximo 1800 px (`Colar.comprimir`).
+- Imagens fixas (logos, personagens, ilustrações): cada uma entra uma vez só, como `background-image` da classe `.im-<nome>` em `<style id="imagens-boletim">`. A `<img class="im im-<nome>">` leva só um SVG vazio com o tamanho medido (`medirImagens`), para manter a proporção. `htmlFinal` leva só as classes usadas: o HTML gerado caiu de 1,6 MB para 0,4 MB (os logos se repetiam nas 10 folhas). `.im` tem `print-color-adjust: exact`, senão o fundo some na impressão sem "Gráficos de fundo". Usar `img(nome, classe, atributos)` em vez de `<img src>` para imagem de `imagens/`.
 
 ## Convenções
 

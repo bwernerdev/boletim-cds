@@ -9,7 +9,35 @@
 
   const $ = (sel, raiz = document) => raiz.querySelector(sel);
   const $$ = (sel, raiz = document) => Array.from(raiz.querySelectorAll(sel));
-  const img = (nome) => (window.IMAGENS || {})[nome] || "";
+
+  // ---------- Imagens fixas (logos, personagens, ilustrações) ----------
+
+  // Cada imagem entra uma vez só, como fundo da classe .im-<nome> no
+  // <style id="imagens-boletim">. A <img> leva só um SVG vazio com o tamanho
+  // da imagem, para manter a proporção. Sem isso, o HTML gerado repetia a mesma
+  // imagem em cada folha (os 3 logos aparecem 10 vezes): 1,6 MB em vez de 0,4 MB.
+  const tamanhos = {};   // nome -> [largura, altura]
+  function medirImagens() {
+    return Promise.all(Object.entries(window.IMAGENS || {}).map(([nome, url]) => new Promise((ok) => {
+      const el = new Image();
+      el.onload = () => { tamanhos[nome] = [el.naturalWidth, el.naturalHeight]; ok(); };
+      el.onerror = () => ok();
+      el.src = url;
+    })));
+  }
+  // <img> de uma imagem fixa. Se a imagem não foi medida, usa o próprio
+  // arquivo como src (plano B: funciona, só não economiza).
+  function img(nome, classe = "", atributos = "") {
+    const url = (window.IMAGENS || {})[nome] || "";
+    const t = tamanhos[nome];
+    if (!t) return `<img class="${classe}" src="${url}" ${atributos}>`;
+    const vazio = `<svg xmlns="http://www.w3.org/2000/svg" width="${t[0]}" height="${t[1]}"/>`;
+    return `<img class="im im-${nome} ${classe}" src="data:image/svg+xml,${encodeURIComponent(vazio)}" ${atributos}>`;
+  }
+  // CSS com o fundo de cada imagem; "nomes" limita às usadas.
+  function cssImagens(nomes = Object.keys(tamanhos)) {
+    return nomes.filter((n) => tamanhos[n]).map((n) => `.im-${n}{background-image:url("${window.IMAGENS[n]}")}`).join("\n");
+  }
 
   const estado = {
     competencia: "",   // "2026-10"
@@ -30,6 +58,7 @@
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }
+  const mesDoCalendario = () => hojeIso().slice(0, 7);   // "2026-11"
   const maiuscula = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
   function marcadores() {
@@ -117,9 +146,9 @@
             <p>${Colar.escapar(BOLETIM.subtitulo)}</p>
             <p>${Colar.escapar(BOLETIM.area)}</p>
           </div>
-          <img src="${img("seara")}" alt="Seara">
-          <img src="${img("prevencao")}" alt="Prevenção de Perdas">
-          <img src="${img("controladoria")}" alt="Controladoria Administrativa CDs">
+          ${img("seara", "", 'alt="Seara"')}
+          ${img("prevencao", "", 'alt="Prevenção de Perdas"')}
+          ${img("controladoria", "", 'alt="Controladoria Administrativa CDs"')}
         </header>
         <div class="moldura">
           ${pg.secoes.map((s) => montarSecao(s, atraso)).join("")}
@@ -133,7 +162,7 @@
   function montarSecao(secao, atraso) {
     return `
       <section class="secao" id="secao-${secao.id}">
-        ${secao.deco ? `<img class="secao-deco" src="${img(secao.deco)}" alt="">` : ""}
+        ${secao.deco ? img(secao.deco, "secao-deco", 'alt=""') : ""}
         ${secao.titulo ? `<h2 class="faixa-titulo" data-marcador="${Colar.escapar(secao.titulo)}"></h2>` : ""}
         ${montarBlocos(secao.blocos, atraso)}
       </section>`;
@@ -167,7 +196,7 @@
       return `
         <div class="fala ${b.lado === "dir" ? "dir" : "esq"}">
           <div class="personagem">
-            <img src="${img(b.personagem)}" alt="${Colar.escapar(p.nome)}" style="${atraso()}">
+            ${img(b.personagem, "", `alt="${Colar.escapar(p.nome)}" style="${atraso()}"`)}
           </div>
           <div class="balao">${editavel(b)}</div>
         </div>`;
@@ -625,7 +654,12 @@
     // Folhas altas ganham zoom menor na impressão, para caber numa página A4
     // também quando o PDF é feito a partir do HTML gerado (que não tem script).
     const zooms = Object.entries(zoomsImpressao()).map(([id, z]) => `#${id}{zoom:${z}}`).join("");
+    const usadas = new Set();
+    copia.querySelectorAll("img.im").forEach((el) => el.classList.forEach((c) => {
+      if (c.startsWith("im-")) usadas.add(c.slice(3));
+    }));
     const css = $("#estilo-boletim").textContent
+      + `\n${cssImagens([...usadas])}`
       + (coresTrocadas ? `\n:root{${coresTrocadas}}` : "")
       + (zooms ? `\n@media print{${zooms}}` : "");
     const titulo = `Boletim Informativo – CDs MI – ${m.Mes}/${m.ano}`;
@@ -678,14 +712,33 @@
   // ---------- Aviso ----------
 
   let temporizador;
-  function avisar(msg, erro = false) {
+  function avisar(msg, erro = false, duracao = erro ? 5000 : 2500) {
     const el = $("#aviso");
     el.textContent = msg;
     el.classList.toggle("erro", erro);
     el.classList.add("mostrar");
     clearTimeout(temporizador);
-    temporizador = setTimeout(() => el.classList.remove("mostrar"), erro ? 5000 : 2500);
+    temporizador = setTimeout(() => el.classList.remove("mostrar"), duracao);
   }
+
+  // Faixa fixa quando o navegador deixa de salvar: o trabalho continua na
+  // tela, mas some ao fechar a página. Fechar a aba passa a pedir confirmação.
+  const ALERTAS_SALVAR = {
+    abrir: "<b>Este navegador não está salvando o boletim.</b> O que você colar ou editar agora some ao fechar a página. "
+      + "Recarregue a página (F5). Se o aviso continuar, gere o boletim antes de fechar.",
+    gravar: "<b>A última alteração não foi salva no navegador</b> (o espaço pode ter acabado). "
+      + "Ela continua na tela, mas some ao fechar a página. Gere o boletim antes de fechar.",
+  };
+  function alertarFalhaAoSalvar(motivo) {
+    const el = $("#alerta-salvar");
+    el.innerHTML = ALERTAS_SALVAR[motivo] || ALERTAS_SALVAR.gravar;
+    el.hidden = false;
+  }
+  window.addEventListener("beforeunload", (e) => {
+    if (!Armazenamento.falha) return;
+    e.preventDefault();
+    e.returnValue = "";
+  });
 
   // ---------- Eventos ----------
 
@@ -766,6 +819,7 @@
       if (!e.target.value) { e.target.value = estado.competencia; return; }
       estado.competencia = e.target.value;
       await Armazenamento.gravar("competencia", estado.competencia);
+      await Armazenamento.gravar("competencia-em", mesDoCalendario());
       atualizarMarcadores();
       atualizarProgresso();
     });
@@ -851,9 +905,32 @@
 
   // ---------- Início ----------
 
+  // Mês do boletim ao abrir. O mês salvo vale no mês do calendário em que foi
+  // escolhido. Num mês novo, se ele ficou para trás do padrão (mês anterior ao
+  // atual), avança para o padrão e a data da extração volta para hoje. Sem
+  // isso, o mês de outubro ficava salvo em dezembro e as tabelas coladas
+  // ganhavam o mês errado. Devolve true se avançou.
+  async function carregarCompetencia() {
+    const padrao = competenciaPadrao();
+    const salva = await Armazenamento.ler("competencia");
+    const escolhidaEm = await Armazenamento.ler("competencia-em");
+    if (salva && (salva >= padrao || escolhidaEm === mesDoCalendario())) {
+      estado.competencia = salva;
+      estado.extracao = (await Armazenamento.ler("extracao")) || hojeIso();
+      return false;
+    }
+    estado.competencia = padrao;
+    estado.extracao = hojeIso();
+    if (!salva) return false;
+    await Armazenamento.gravar("competencia", estado.competencia);
+    await Armazenamento.gravar("competencia-em", mesDoCalendario());
+    await Armazenamento.gravar("extracao", estado.extracao);
+    return true;
+  }
+
   async function iniciar() {
-    estado.competencia = (await Armazenamento.ler("competencia")) || competenciaPadrao();
-    estado.extracao = (await Armazenamento.ler("extracao")) || hojeIso();
+    Armazenamento.aoFalhar(alertarFalhaAoSalvar);
+    const avancou = await carregarCompetencia();
     for (const id of blocoPorId.keys()) {
       const b = blocoPorId.get(id);
       if (b.tipo === "tabela") {
@@ -868,9 +945,15 @@
     if (await Armazenamento.ler("ajuda-fechada")) $("#ajuda").hidden = true;
     $("#campo-mes").value = estado.competencia;
     $("#campo-extracao").value = estado.extracao;
+    await medirImagens();
+    $("#imagens-boletim").textContent = cssImagens();
     montar();
     ligarEventos();
     observarFolhaAtual();
+    if (avancou) {
+      const m = marcadores();
+      avisar(`Mês novo: o boletim passou para ${m.Mes}/${m.ano} e a data da extração voltou para hoje. Confira na barra do topo.`, false, 9000);
+    }
   }
 
   aplicarTema(lerTema());
