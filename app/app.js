@@ -359,7 +359,7 @@
     $("#barra").style.setProperty("--cor-progresso", `hsl(${Math.round(40 + 100 * fracao)} 68% 40%)`);
     $("#progresso-barra").style.width = `${fracao * 100}%`;
     $("#linha-progresso").style.width = `${fracao * 100}%`;
-    atualizarIndice();
+    atualizarIndice(feitos, total);
   }
 
   // ---------- Índice das folhas ----------
@@ -370,10 +370,8 @@
     return d.competencia === estado.competencia ? "ok" : "antigo";
   }
 
-  function atualizarIndice() {
+  function atualizarIndice(feitos, total) {
     const m = marcadores();
-    const total = $$(".slot").length;
-    const feitos = total - slotsPendentes().length;
     $("#indice").innerHTML = `
       <div class="indice-topo">
         <strong>Folhas</strong>
@@ -468,7 +466,7 @@
 
   // Na impressão o miolo da folha tem 900 px e zoom 0,81 (CSS). A folha que
   // passaria da altura útil do A4 (281 mm ≈ 1062 px) ganha um zoom menor.
-  const ZOOM_IMPRESSAO = 0.81;
+  const ZOOM_IMPRESSAO = 0.81;   // igual ao zoom da .pagina no @media print do index.html
   const ALTURA_A4 = 1050;
   let impressaoPreparada = false;
   let previaAntes = false;
@@ -645,9 +643,9 @@
       if (!d || d.competencia !== estado.competencia) fig.remove();
     });
     copia.querySelectorAll(".pendente").forEach((el) => el.replaceWith(...el.childNodes));
-    copia.querySelectorAll("[tabindex],[title],[contenteditable],[data-texto],[data-slot],[data-marcador],[data-versao],[aria-label]")
-      .forEach((el) => ["tabindex", "title", "contenteditable", "data-texto", "data-slot", "data-marcador", "data-versao", "aria-label"]
-        .forEach((a) => el.removeAttribute(a)));
+    const atributosDoEditor = ["tabindex", "title", "contenteditable", "data-texto", "data-slot", "data-marcador", "data-versao", "aria-label"];
+    copia.querySelectorAll(atributosDoEditor.map((a) => `[${a}]`).join())
+      .forEach((el) => atributosDoEditor.forEach((a) => el.removeAttribute(a)));
     copia.querySelectorAll(".editavel").forEach((el) => el.classList.remove("editavel"));
     copia.querySelectorAll(".texto-alterado").forEach((el) => el.classList.remove("texto-alterado"));
     const coresTrocadas = Object.entries(estado.cores).map(([nome, valor]) => `${nome}:${valor}`).join(";");
@@ -919,13 +917,14 @@
       estado.extracao = (await Armazenamento.ler("extracao")) || hojeIso();
       return false;
     }
+    // Grava também na primeira abertura: sem o mês salvo, a data da extração
+    // escolhida voltava para hoje a cada F5.
     estado.competencia = padrao;
     estado.extracao = hojeIso();
-    if (!salva) return false;
     await Armazenamento.gravar("competencia", estado.competencia);
     await Armazenamento.gravar("competencia-em", mesDoCalendario());
     await Armazenamento.gravar("extracao", estado.extracao);
-    return true;
+    return !!salva;
   }
 
   async function iniciar() {

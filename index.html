@@ -219,36 +219,39 @@ body {
 
 /* ---------- Telas pequenas ---------- */
 /* Só "screen": a folha A4 tem uns 733 px de largura e, sem isso, o PDF pegava
-   o layout de celular (bonecos centralizados, fora do lugar). */
+   o layout de celular (bonecos centralizados, fora do lugar).
+   O :where(body:not(.imprimindo)) desliga este layout enquanto o editor mede as
+   folhas para a impressão (classe "imprimindo"), sem mudar a especificidade:
+   numa janela estreita a medida saía com os bonecos empilhados e o PDF encolhia. */
 @media screen and (max-width: 760px) {
-  .boletim { padding: 0 8px; margin-top: 8px; }
-  .pagina { padding: 14px 12px 10px; margin-bottom: 16px; border-radius: 6px; }
-  .pagina-topo { flex-wrap: wrap; justify-content: center; }
-  .pagina-topo .titulos { flex-basis: 100%; text-align: center; }
-  .moldura { padding: 14px 10px 4px; }
-  .faixa-titulo { display: block; text-align: center; padding: 6px 14px; }
-  .secao-deco { width: 90px; }
+  :where(body:not(.imprimindo)) .boletim { padding: 0 8px; margin-top: 8px; }
+  :where(body:not(.imprimindo)) .pagina { padding: 14px 12px 10px; margin-bottom: 16px; border-radius: 6px; }
+  :where(body:not(.imprimindo)) .pagina-topo { flex-wrap: wrap; justify-content: center; }
+  :where(body:not(.imprimindo)) .pagina-topo .titulos { flex-basis: 100%; text-align: center; }
+  :where(body:not(.imprimindo)) .moldura { padding: 14px 10px 4px; }
+  :where(body:not(.imprimindo)) .faixa-titulo { display: block; text-align: center; padding: 6px 14px; }
+  :where(body:not(.imprimindo)) .secao-deco { width: 90px; }
   /* Boneco menor, em cima do balão, com o rabicho apontando para cima. */
-  .personagem, .fala.esq .personagem { float: none; margin: 0 auto 2px; width: max-content; }
-  .personagem img { height: 150px; }
-  .fala .balao { margin-top: 16px; }
-  .fala.dir .balao::before, .fala.esq .balao::before {
+  :where(body:not(.imprimindo)) .personagem, :where(body:not(.imprimindo)) .fala.esq .personagem { float: none; margin: 0 auto 2px; width: max-content; }
+  :where(body:not(.imprimindo)) .personagem img { height: 150px; }
+  :where(body:not(.imprimindo)) .fala .balao { margin-top: 16px; }
+  :where(body:not(.imprimindo)) .fala.dir .balao::before, :where(body:not(.imprimindo)) .fala.esq .balao::before {
     top: -24px; left: 50%; right: auto; margin: 0 0 0 -12px;
     border-color: transparent transparent var(--tinta);
   }
-  .fala.dir .balao::after, .fala.esq .balao::after {
+  :where(body:not(.imprimindo)) .fala.dir .balao::after, :where(body:not(.imprimindo)) .fala.esq .balao::after {
     top: -19px; left: 50%; right: auto; margin: 0 0 0 -10px;
     border-color: transparent transparent #fff;
   }
-  .par { flex-direction: column; }
-  .par > .slot { width: 100%; }
+  :where(body:not(.imprimindo)) .par { flex-direction: column; }
+  :where(body:not(.imprimindo)) .par > .slot { width: 100%; }
 }
 
 /* ---------- Impressão / PDF ---------- */
 /* O miolo da folha mantém a largura da tela do computador (900 px) e é
    reduzido com zoom para caber na largura do A4 (~733 px): o PDF sai com o
    mesmo layout da tela. O editor ainda reduz cada folha que passaria da
-   altura do A4, para caber numa página só (app.js, ajustarFolhasAoA4). */
+   altura do A4, para caber numa página só (app.js, zoomsImpressao; o 0,81 está repetido lá em ZOOM_IMPRESSAO). */
 @media print {
   @page { size: A4; margin: 8mm; }
   body { background: #fff; }
@@ -263,7 +266,7 @@ body {
 <!-- Imagens fixas, uma vez cada (preenchido pelo app.js; a exportação leva só as usadas). -->
 <style id="imagens-boletim"></style>
 <!-- Só o editor usa os estilos abaixo; a exportação não os leva. -->
-<link rel="stylesheet" href="app/editor.css?v=11">
+<link rel="stylesheet" href="app/editor.css?v=12">
 </head>
 <body>
 <!-- Barra do topo. No celular, mês, extração e os botões secundários vão para
@@ -344,10 +347,10 @@ body {
 
 <div class="aviso so-editor" id="aviso" role="status" aria-live="polite"></div>
 
-<script src="app/imagens.js?v=11"></script>
-<script src="app/conteudo.js?v=11"></script>
-<script src="app/armazenamento.js?v=11"></script>
-<script src="app/colar.js?v=11"></script>
-<script src="app/app.js?v=11"></script>
+<script src="app/imagens.js?v=12"></script>
+<script src="app/conteudo.js?v=12"></script>
+<script src="app/armazenamento.js?v=12"></script>
+<script src="app/colar.js?v=12"></script>
+<script src="app/app.js?v=12"></script>
 </body>
 </html>

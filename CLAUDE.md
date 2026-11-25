@@ -20,7 +20,7 @@ Editor HTML estático do Boletim Informativo mensal da Controladoria CDs MI. Sub
 - Rabicho do balão: `::before` (triângulo escuro) + `::after` (triângulo branco que também apaga a borda), em `top: 50%`, com `.balao { min-height: 64px }` para cair no trecho reto da borda. Não voltar ao quadrado girado: ele pegava a curva do canto e abria.
 - Cores: `CORES_TEXTO` (bolinhas da barrinha de edição, marcação `{cor:nome|#hex}...{/cor}`) e `CORES_GERAIS` (variáveis `--ouro-texto`, `--ouro-forte`, `--ouro`, `--tinta`, painel **Cores**). `htmlFinal` acrescenta `:root{...}` com as cores trocadas. Antes de exportar ou imprimir, `encerrarEdicoes()` chama `terminarEdicao` direto, porque o `blur()` nem sempre dispara e o texto sairia com a marcação crua.
 - Tamanhos com `clamp()` e `cqi` (`.pagina` é `container-type: inline-size`): escalam com a largura da folha, não da tela. Cada regra tem antes a linha em px (plano B).
-- Celular: `@media screen and (max-width: 760px)`. O `screen` é obrigatório: o A4 tem ~733 px e, sem ele, o PDF pegava o layout de celular (bonecos fora do lugar).
+- Celular: `@media screen and (max-width: 760px)`. O `screen` é obrigatório: o A4 tem ~733 px e, sem ele, o PDF pegava o layout de celular (bonecos fora do lugar). Os seletores começam com `:where(body:not(.imprimindo))`, para que a medida da impressão numa janela estreita não use o layout de celular (o `:where` não muda a especificidade).
 - Impressão: `.pagina` com 900 px (a mesma largura do miolo na tela) e `zoom: .81`. `zoomsImpressao()` (app.js) mede cada folha com `body.previa.imprimindo` e dá zoom menor à que passa de 1050 px. Vale no botão, no `Ctrl+P` (`beforeprint`/`afterprint`) e no HTML gerado (`htmlFinal` grava `@media print{#folha-N{zoom:…}}`). O `page.pdf()` do Playwright dispara `afterprint`.
 - Animações só em CSS, para funcionar no HTML exportado (que não tem script): `respirar`, `acenar`, `brilho`, e entrada com `animation-timeline: view()` dentro de `@supports`. Respeitam `prefers-reduced-motion` e são desligadas na impressão.
 - `editor.css` declara as próprias variáveis (`--borda`, `--azul`...), porque o `:root` do boletim não as tem. As `--e-*` são da moldura do editor (barra, índice, ajuda) e mudam no modo escuro; a folha continua branca. Tema em `localStorage` `boletim-cds:tema` (`claro`/`escuro`; vazio segue o sistema), aplicado em `html[data-tema]`.
@@ -40,6 +40,7 @@ Editor HTML estático do Boletim Informativo mensal da Controladoria CDs MI. Sub
 
 ## Testar
 
+- `node ferramentas/teste.cjs`: teste automático (datas, colagem, impressão). Rodar antes de cada push que mexa em `app/` ou no `index.html`.
 - Servidor local: configuração `boletim-cds` em `projetos/.claude/launch.json` (`python -m http.server 5517`).
 - Também testar em `file://`, que é o uso real. O painel do navegador do app mostra `file://` só como snapshot estático. Use o Playwright do `giro-estoque/node_modules` com `channel: 'msedge'`.
 - Excel real para gerar HTML de colagem: COM `Excel.Application` + `Range.Copy()` + `Clipboard.GetText(Html)`. O Excel já põe a formatação condicional inline no HTML.

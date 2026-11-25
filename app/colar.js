@@ -52,29 +52,7 @@ window.Colar = (() => {
         el.setAttribute("style", lista.join(";") + ";" + proprio);
       }
 
-      doc.body.querySelectorAll(TAGS_FORA).forEach((el) => el.remove());
-      for (const el of doc.body.querySelectorAll("*")) {
-        el.removeAttribute("class");
-        el.removeAttribute("id");
-        for (const attr of Array.from(el.attributes)) {
-          if (/^on/i.test(attr.name)) el.removeAttribute(attr.name);
-          if (/^x:|^v:|^o:/i.test(attr.name)) el.removeAttribute(attr.name);
-        }
-        // Remove propriedades mso-* que sobraram e limpa o atributo.
-        const st = el.getAttribute("style");
-        if (st) {
-          const limpo = st.split(";").filter((p) => p.trim() && !/^\s*mso-/i.test(p)).join(";");
-          if (limpo) el.setAttribute("style", limpo);
-          else el.removeAttribute("style");
-        }
-      }
-      // Links e imagens externas não funcionam fora da rede da empresa.
-      doc.body.querySelectorAll("a").forEach((a) => a.replaceWith(...a.childNodes));
-      doc.body.querySelectorAll("img").forEach((img) => {
-        if (!/^data:/i.test(img.getAttribute("src") || "")) img.remove();
-      });
-
-      return doc.body.innerHTML.replace(/<!--(StartFragment|EndFragment)-->/g, "").trim();
+      return limpar(doc);
     } catch {
       return semCss(html);
     } finally {
@@ -85,13 +63,26 @@ window.Colar = (() => {
   // Plano B se o navegador não deixar usar o iframe: perde as cores que vêm
   // das classes do Excel, mas mantém a tabela e os estilos próprios das células.
   function semCss(html) {
-    const doc = new DOMParser().parseFromString(html, "text/html");
+    return limpar(new DOMParser().parseFromString(html, "text/html"));
+  }
+
+  // Limpeza comum aos dois caminhos: tira tags perigosas, eventos (on*),
+  // classes, ids, atributos e estilos do Office (x:, v:, o:, mso-*), links e
+  // imagens externas. Devolve o HTML do corpo.
+  function limpar(doc) {
     doc.body.querySelectorAll(TAGS_FORA).forEach((el) => el.remove());
     for (const el of doc.body.querySelectorAll("*")) {
       for (const attr of Array.from(el.attributes)) {
-        if (attr.name === "class" || /^on/i.test(attr.name) || /^(x|v|o):/i.test(attr.name)) el.removeAttribute(attr.name);
+        if (/^(class|id|on.*|(x|v|o):.*)$/i.test(attr.name)) el.removeAttribute(attr.name);
+      }
+      const st = el.getAttribute("style");
+      if (st) {
+        const limpo = st.split(";").filter((p) => p.trim() && !/^\s*mso-/i.test(p)).join(";");
+        if (limpo) el.setAttribute("style", limpo);
+        else el.removeAttribute("style");
       }
     }
+    // Links e imagens externas não funcionam fora da rede da empresa.
     doc.body.querySelectorAll("a").forEach((a) => a.replaceWith(...a.childNodes));
     doc.body.querySelectorAll("img").forEach((img) => {
       if (!/^data:/i.test(img.getAttribute("src") || "")) img.remove();
