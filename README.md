@@ -1,53 +1,32 @@
 # Boletim CDs
+Editor do **Boletim Informativo – CDs MI** da Controladoria: cola as tabelas do Excel e gera o boletim do mês em HTML ou PDF. Roda no navegador, sem servidor; os dados ficam só no computador de quem usa (nada vai ao GitHub).
 
-Editor para montar o **Boletim Informativo – CDs MI** da Controladoria. Antes, o boletim era montado à mão no Word, com prints de cada tabela. Agora o Jorge abre esta página, cola as tabelas do Excel e gera o boletim do mês em HTML ou PDF.
+**Link:** https://bwernerdev.github.io/boletim-cds/ (só entrega a página). Também abre `index.html` com dois cliques; cada endereço guarda os próprios dados.
 
-Roda no navegador, sem servidor e sem internet. Os dados ficam só no computador de quem usa.
+## Uso mensal
+1. Confira o **Mês do boletim** (começa no mês anterior e avança sozinho no mês novo, com aviso e data da extração = hoje; mês escolhido à mão vale até o fim dele) e a **Extração Quirius**.
+2. Para cada quadro tracejado: copie a tabela no Excel (`Ctrl+C`) e cole no quadro (`Ctrl+V`); cores e formatação vêm junto. Qlik/outro sistema: print (`Win+Shift+S`) e cole, ou arraste a imagem. O print vira WebP de até 1800 px (20 prints: 12,6 → 4,8 MB).
+3. Tabela larga: **−**, **+** ou **Ajustar** no quadro (ao colar já encolhe).
+4. Revise os trechos **amarelos** (dependem dos números do mês, ex.: CDs fora da meta): edite e apague os `[ ]`.
+5. **Gerar boletim HTML** cria `Boletim Informativo - CDs MI - MM-AAAA.html`, arquivo único com imagens embutidas. **Imprimir / PDF** usa o navegador ("Salvar como PDF").
 
-**Link:** https://bwernerdev.github.io/boletim-cds/
-
-O link só entrega a página. As tabelas coladas não saem do navegador de quem usa e não vão para o GitHub.
-
-## Como usar (todo mês)
-
-1. Abra o link acima, ou o `index.html` com dois cliques (Edge ou Chrome). Cada endereço guarda os próprios dados: o que foi colado pelo link não aparece no arquivo local, e vice-versa.
-2. Na barra do topo, confira o **Mês do boletim**. Ele começa no mês anterior ao atual e avança sozinho quando um mês novo começa (aparece um aviso, e a data da extração volta para hoje). Um mês escolhido à mão fica até o fim daquele mês. Preencha também a **Extração Quirius**.
-3. Para cada quadro tracejado:
-   - no Excel, selecione a tabela e copie (`Ctrl+C`);
-   - na página, clique no quadro e cole (`Ctrl+V`).
-   Cores, bordas e formatação condicional vêm junto. Para o Qlik ou outro sistema, tire um print (`Win+Shift+S`) e cole do mesmo jeito, ou arraste o arquivo de imagem para o quadro. O print é convertido para WebP e limitado a 1800 px de largura, para o boletim não ficar pesado: com 20 prints, cai de 12,6 MB para 4,8 MB.
-4. Se a tabela ficar larga demais, use **−**, **+** ou **Ajustar** no quadro. Ao colar, ela já encolhe para caber.
-5. Revise os trechos em **amarelo**. Eles dependem dos números do mês, como os CDs fora da meta. Clique no texto para editar e apague os colchetes `[ ]` quando estiver certo.
-6. Clique em **Gerar boletim HTML**. Sai um arquivo único, `Boletim Informativo - CDs MI - MM-AAAA.html`, com imagens embutidas, pronto para enviar. **Imprimir / PDF** gera o PDF pelo navegador; escolha "Salvar como PDF".
-
-O botão de progresso no topo mostra quantas tabelas do mês já foram coladas. Clique nele para ir à próxima vazia. A linha fina embaixo da barra vai de amarelo a verde conforme o mês fica completo. Um quadro com tabela de outro mês fica **amarelo** e não entra no boletim até receber a tabela nova.
-
-**Índice das folhas:** em telas largas fica fixo à esquerda; nas menores abre pelo botão ☰. Mostra as 10 folhas, cada tabela com ✓ (colada), ○ (vazia) ou ! (de outro mês), e leva até ela com um clique.
-
-**Pré-visualizar** esconde tudo do editor e mostra o boletim como vai sair. **Voltar à edição** ou `Esc` volta.
-
-No celular e em telas estreitas, mês, extração e os botões secundários ficam no menu **⋯**. O ícone de lua alterna o modo escuro do editor; o boletim continua claro.
+- Botão de progresso no topo: tabelas coladas no mês; clique vai à próxima vazia. A linha embaixo vai de amarelo a verde.
+- Quadro **amarelo** = tabela de outro mês; não entra no boletim até receber a nova.
+- **Índice das folhas** (fixo à esquerda em tela larga; ☰ nas menores): 10 folhas, tabelas com ✓ colada, ○ vazia, ! outro mês.
+- **Pré-visualizar** mostra o boletim final; **Voltar à edição** ou `Esc` volta.
+- Telas estreitas: mês, extração e botões secundários no menu **⋯**. A lua alterna o modo escuro do editor (o boletim fica claro).
 
 ## Visual
-
-O layout segue o boletim do Word:
-- **Folhas:** 10 folhas, cada uma com moldura dourada, cabeçalho "Boletim Informativo {mês}/{ano}" com os logos Seara, Prevenção de Perdas e Controladoria, e a frase no rodapé.
-- **Títulos:** faixa dourada nas seções principais.
-- **Personagens:** grandes, com as tabelas e os textos seguintes ao lado deles enquanto houver altura. Em duas falas seguidas de lados opostos, como Morlus e Lechinski, a segunda começa logo abaixo do primeiro balão, como numa conversa.
-- **Balões:** brancos, com borda escura, rabicho para o personagem e texto dourado com negrito.
-- **Ilustrações:** clarinhas no canto das seções, como marca d'água.
-
-**Movimento:** os personagens "respiram" e acenam ao passar o mouse. Balões, tabelas e personagens entram ao rolar a página (no Edge e no Chrome), e a faixa do título tem um brilho que passa. Tudo some na impressão e para quem desliga as animações no sistema.
-
-Na impressão ou no PDF, cada folha vira uma página A4, com o mesmo layout da tela do computador. A folha que passaria da altura do A4 é reduzida para caber numa página só, tanto pelo botão **Imprimir / PDF** (ou `Ctrl+P`) quanto no HTML gerado.
-
-No celular, o boneco fica menor e em cima do balão, e a tabela larga rola para o lado, com sombra na borda que ainda tem conteúdo. Títulos, textos, logos e bonecos mudam de tamanho com a largura da folha.
+- 10 folhas com moldura dourada, cabeçalho "Boletim Informativo {mês}/{ano}" (logos Seara, Prevenção de Perdas, Controladoria) e frase no rodapé; faixa dourada nos títulos; ilustrações clarinhas como marca d'água.
+- Personagens grandes com tabelas e textos ao lado; duas falas de lados opostos (Morlus e Lechinski): a segunda começa logo abaixo do primeiro balão. Balões brancos, borda escura, texto dourado em negrito.
+- Movimento (personagens, entrada ao rolar, brilho no título) some na impressão e com animações desligadas no sistema.
+- Impressão/PDF: uma folha = uma página A4 (mesmo layout do computador); folha mais alta que o A4 é reduzida, no `Ctrl+P` e no HTML gerado.
+- Celular: boneco menor sobre o balão; tabela larga rola de lado, com sombra na borda.
 
 ## Textos
+Clique em fala ou parágrafo para editar; `**assim**` = negrito. Marcadores trocam com o mês:
 
-Clique em qualquer fala ou parágrafo para editar. `**assim**` sai em negrito. Durante a edição aparecem os marcadores, que trocam sozinhos com o mês:
-
-| Marcador | Exemplo (mês 10/2026) |
+| Marcador | Exemplo (10/2026) |
 | --- | --- |
 | `{mes}` / `{Mes}` / `{MES}` | outubro / Outubro / OUTUBRO |
 | `{mm}` | 10 |
@@ -56,39 +35,33 @@ Clique em qualquer fala ou parágrafo para editar. `**assim**` sai em negrito. D
 | `{mes_ant}` / `{Mes_ant}` / `{aa_mes_ant}` | setembro / Setembro / 26 |
 | `{data_extracao}` | 03/11/26 |
 
-Texto alterado fica salvo e ganha o botão **Voltar ao texto padrão**. Os textos padrão estão em `app/conteudo.js`.
+Texto alterado ganha **Voltar ao texto padrão**. Padrões em `app/conteudo.js`.
 
 ## Cores das fontes
-
-- **Um trecho:** clique no texto para editar e selecione o trecho. Na barrinha que aparece em cima, **N** põe negrito e cada bolinha pinta o trecho (vermelho, verde, azul, laranja, preto ou dourado). No texto em edição, isso aparece como `**trecho**` e `{cor:vermelho}trecho{/cor}`. Também dá para digitar um código de cor: `{cor:#ff0000}trecho{/cor}`.
-- **O boletim todo:** o botão **Cores**, na barra do topo, troca a cor do texto dos balões, do negrito, do título e da moldura das folhas, e da borda dos balões. **Voltar às cores do Word** desfaz.
-
-As duas opções ficam salvas e saem no boletim gerado e no PDF.
+- **Trecho:** selecione no texto em edição; **N** = negrito, bolinhas pintam (vermelho, verde, azul, laranja, preto, dourado). Fica `{cor:vermelho}trecho{/cor}` ou `{cor:#ff0000}trecho{/cor}`.
+- **Boletim todo:** botão **Cores** (texto dos balões, negrito, título, moldura, borda dos balões). **Voltar às cores do Word** desfaz.
+- Ambas ficam salvas e saem no HTML e no PDF.
 
 ## O que fica salvo
-
-Tabelas coladas, textos alterados, cores escolhidas e o mês ficam no IndexedDB do navegador. Valem para aquele navegador, naquele computador. Em janela anônima nada é salvo.
-
-Se o navegador deixar de salvar (o banco não abre em 3 s, ou o espaço acaba), aparece uma **faixa vermelha** no topo. O que está na tela continua lá, mas some ao fechar a página: gere o boletim antes. Enquanto a faixa estiver aberta, fechar a aba pede confirmação. **Limpar tabelas** apaga só as tabelas; os textos alterados continuam.
+- Tabelas, textos, cores e mês: IndexedDB do navegador (por navegador e computador; janela anônima não salva).
+- Se não salvar (banco não abre em 3 s ou sem espaço): **faixa vermelha** no topo; o que está na tela some ao fechar, então gere o boletim antes. Com a faixa, fechar a aba pede confirmação.
+- **Limpar tabelas** apaga só as tabelas; textos alterados ficam.
 
 ## Pastas
-
 | Caminho | O que é |
 | --- | --- |
-| `index.html` | Página do editor e CSS do boletim (o mesmo CSS vai no HTML exportado). |
-| `app/` | Scripts do editor, conteúdo das seções e imagens embutidas. Ver `app/README.md`. |
-| `imagens/` | Personagens, logos e ilustrações em `.webp` (fonte do `app/imagens.js`). Ver `imagens/README.md`. |
-| `ferramentas/` | Script que gera `app/imagens.js`. Ver `ferramentas/README.md`. |
-| `.github/` | Publicação automática no GitHub Pages a cada push em `main`. Ver `.github/README.md`. |
+| `index.html` | Editor e CSS do boletim (o mesmo CSS vai no HTML exportado) |
+| `app/` | Scripts, conteúdo das seções e imagens embutidas (`app/README.md`) |
+| `imagens/` | Personagens, logos e ilustrações `.webp`, fonte do `app/imagens.js` (`imagens/README.md`) |
+| `ferramentas/` | Gera `app/imagens.js` (`ferramentas/README.md`) |
+| `.github/` | Publica no GitHub Pages a cada push em `main` (`.github/README.md`) |
 
-## Trocar ou incluir personagem e imagem
+## Trocar ou incluir personagem/imagem
+1. Ponha o `.webp` (ou `.png`/`.jpg`) em `imagens/`; o nome vira a chave (`joao.webp` → `joao`).
+2. `python ferramentas/gerar_imagens_js.py`
+3. Em `app/conteudo.js`, inclua em `PERSONAGENS` e use a chave nas falas (`personagem: "joao"`).
 
-1. Coloque o `.webp` (ou `.png`/`.jpg`) em `imagens/`. O nome do arquivo vira a chave, por exemplo `imagens/joao.webp` vira `joao`.
-2. Rode `python ferramentas/gerar_imagens_js.py`.
-3. Em `app/conteudo.js`, inclua o personagem em `PERSONAGENS` e use a chave nas falas (`personagem: "joao"`).
-
-## Incluir ou mudar seção e tabela
-
-Edite `window.SECOES` em `app/conteudo.js`. O campo `pagina` diz em qual folha a seção entra. Cada bloco precisa de um `id` único, porque é a chave da colagem ou do texto salvo. Trocar o `id` faz o quadro aparecer vazio.
-
-Ao mudar qualquer arquivo de `app/`, aumente o `?v=` dos links no `index.html`. Assim o navegador de quem usa pega a versão nova, em vez da guardada em cache.
+## Incluir ou mudar seção/tabela
+- Edite `window.SECOES` em `app/conteudo.js`; `pagina` = folha da seção.
+- Cada bloco tem `id` único (chave da colagem/texto salvo). Trocar o `id` esvazia o quadro.
+- Mudou qualquer arquivo de `app/`: aumente o `?v=` dos links no `index.html` (senão o cache serve a versão velha).
